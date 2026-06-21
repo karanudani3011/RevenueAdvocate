@@ -7,8 +7,8 @@ import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import ClientsList from './components/ClientsList';
 import CasesList from './components/CasesList';
-import HearingsList from './components/HearingsList';
 import PaymentsList from './components/PaymentsList';
+import Profile from './components/Profile';
 
 function AppContent() {
   const { currentUser } = useApp();
@@ -38,8 +38,8 @@ function AppContent() {
           {currentTab === 'dashboard' && <Dashboard setCurrentTab={setCurrentTab} />}
           {currentTab === 'clients' && <ClientsList />}
           {currentTab === 'cases' && <CasesList />}
-          {currentTab === 'hearings' && <HearingsList />}
           {currentTab === 'finance' && <PaymentsList />}
+          {currentTab === 'profile' && <Profile />}
         </div>
       </main>
     </div>

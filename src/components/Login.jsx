@@ -101,7 +101,6 @@ export default function Login({ onNavigateToForgot }) {
           <p style={{ fontWeight: '600', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Demo Credentials:</p>
           <ul style={{ listStyleType: 'none', display: 'flex', flexDirection: 'column', gap: '4px' }}>
             <li>⚖️ <strong>Super Admin:</strong> <code>admin</code> / <code>admin123</code></li>
-            <li>💼 <strong>Office Staff:</strong> <code>staff</code> / <code>staff123</code></li>
             <li>💰 <strong>Accountant:</strong> <code>accountant</code> / <code>accountant123</code></li>
           </ul>
         </div>

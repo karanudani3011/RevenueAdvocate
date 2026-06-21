@@ -1,26 +1,18 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import ChangePassword from './ChangePassword';
 
 export default function Header({ currentTab }) {
   const { currentUser, theme, toggleTheme, activities } = useApp();
-  const [isChangeOpen, setIsChangeOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
   const getTitle = () => {
     switch (currentTab) {
-      case 'dashboard':
-        return 'Chambers Dashboard';
-      case 'clients':
-        return 'Client Directory';
-      case 'cases':
-        return 'Case Portfolios';
-      case 'hearings':
-        return 'Hearings Schedule';
-      case 'finance':
-        return 'Financial Ledgers';
-      default:
-        return 'Advocate Panel';
+      case 'dashboard': return 'Chambers Dashboard';
+      case 'clients':   return 'Client Directory';
+      case 'cases':     return 'Case Portfolios';
+      case 'finance':   return 'Financial Ledgers';
+      case 'profile':   return 'My Profile';
+      default:          return 'Advocate Panel';
     }
   };
 
@@ -110,17 +102,8 @@ export default function Header({ currentTab }) {
           )}
         </div>
 
-        {/* Change Password Trigger */}
-        <button 
-          className="header-btn" 
-          onClick={() => setIsChangeOpen(true)}
-          id="change-pw-btn"
-        >
-          <span>🔑</span> Change Password
-        </button>
       </div>
 
-      <ChangePassword isOpen={isChangeOpen} onClose={() => setIsChangeOpen(false)} />
     </header>
   );
 }

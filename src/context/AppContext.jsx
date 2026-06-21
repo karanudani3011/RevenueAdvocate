@@ -3,9 +3,8 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const AppContext = createContext();
 
 const initialUsers = {
-  admin: { username: 'admin', password: 'admin123', role: 'Super Admin (Advocate)', name: 'Adv. Karan Sharma', securityAnswer: 'delhi' },
-  staff: { username: 'staff', password: 'staff123', role: 'Office Staff', name: 'Rohan Verma', securityAnswer: 'mumbai' },
-  accountant: { username: 'accountant', password: 'accountant123', role: 'Accountant', name: 'Neelam Sen', securityAnswer: 'bangalore' }
+  admin: { username: 'admin', password: 'admin123', role: 'Super Admin (Advocate)', name: 'Adv. Karan Sharma', securityAnswer: 'delhi', email: 'karan.sharma@lexjuris.in', phone: '+91 98101 23456', licenceNumber: 'BAR/DL/2018/04821' },
+  accountant: { username: 'accountant', password: 'accountant123', role: 'Accountant', name: 'Neelam Sen', securityAnswer: 'bangalore', email: 'neelam.sen@lexjuris.in', phone: '+91 99203 87654', licenceNumber: 'N/A' }
 };
 
 const getTodayDateString = (offsetDays = 0) => {
@@ -25,15 +24,15 @@ const initialClients = [
 ];
 
 const initialCases = [
-  { id: 'case1', caseNumber: 'SC/2026/1024', title: 'Mehta vs. Tech Solutions', clientId: 'c1', clientName: 'Aarav Mehta', status: 'active', court: 'Supreme Court of India', type: 'Civil' },
-  { id: 'case2', caseNumber: 'HC/2025/4412', title: 'Priya Patel Property Dispute', clientId: 'c2', clientName: 'Priya Patel', status: 'active', court: 'Bombay High Court', type: 'Property' },
-  { id: 'case3', caseNumber: 'DC/2024/0987', title: 'Vikram Singh Labor Case', clientId: 'c3', clientName: 'Vikram Singh', status: 'closed', court: 'Delhi District Court', type: 'Labor' },
-  { id: 'case4', caseNumber: 'HC/2026/1209', title: 'Ananya Iyer Contract Dispute', clientId: 'c4', clientName: 'Ananya Iyer', status: 'pending', court: 'Karnataka High Court', type: 'Commercial' },
-  { id: 'case5', caseNumber: 'SC/2025/3089', title: 'Kabir Kapoor Criminal Appeal', clientId: 'c5', clientName: 'Kabir Kapoor', status: 'active', court: 'Supreme Court of India', type: 'Criminal' },
-  { id: 'case6', caseNumber: 'DC/2025/5512', title: 'Sneha Reddy Divorce Settlement', clientId: 'c6', clientName: 'Sneha Reddy', status: 'closed', court: 'Family Court, Hyderabad', type: 'Family' },
-  { id: 'case7', caseNumber: 'HC/2026/0441', title: 'Joshi Tax Evading Appeal', clientId: 'c7', clientName: 'Devendra Joshi', status: 'pending', court: 'Rajasthan High Court', type: 'Taxation' },
-  { id: 'case8', caseNumber: 'SC/2026/0012', title: 'State vs. Kapoor', clientId: 'c5', clientName: 'Kabir Kapoor', status: 'active', court: 'Supreme Court of India', type: 'Criminal' },
-  { id: 'case9', caseNumber: 'HC/2026/9931', title: 'Reddy Builders Contract Review', clientId: 'c6', clientName: 'Sneha Reddy', status: 'active', court: 'Telangana High Court', type: 'Commercial' }
+  { id: 'case1', caseNumber: 'SC/2026/1024', title: 'Mehta vs. Tech Solutions', clientId: 'c1', clientName: 'Aarav Mehta', status: 'active', court: 'Supreme Court of India', type: 'Civil', date: '2026-01-15' },
+  { id: 'case2', caseNumber: 'HC/2025/4412', title: 'Priya Patel Property Dispute', clientId: 'c2', clientName: 'Priya Patel', status: 'active', court: 'Bombay High Court', type: 'Property', date: '2025-11-08' },
+  { id: 'case3', caseNumber: 'DC/2024/0987', title: 'Vikram Singh Labor Case', clientId: 'c3', clientName: 'Vikram Singh', status: 'closed', court: 'Delhi District Court', type: 'Labor', date: '2024-09-22' },
+  { id: 'case4', caseNumber: 'HC/2026/1209', title: 'Ananya Iyer Contract Dispute', clientId: 'c4', clientName: 'Ananya Iyer', status: 'pending', court: 'Karnataka High Court', type: 'Commercial', date: '2026-02-10' },
+  { id: 'case5', caseNumber: 'SC/2025/3089', title: 'Kabir Kapoor Criminal Appeal', clientId: 'c5', clientName: 'Kabir Kapoor', status: 'active', court: 'Supreme Court of India', type: 'Criminal', date: '2025-07-30' },
+  { id: 'case6', caseNumber: 'DC/2025/5512', title: 'Sneha Reddy Divorce Settlement', clientId: 'c6', clientName: 'Sneha Reddy', status: 'closed', court: 'Family Court, Hyderabad', type: 'Family', date: '2025-03-18' },
+  { id: 'case7', caseNumber: 'HC/2026/0441', title: 'Joshi Tax Evading Appeal', clientId: 'c7', clientName: 'Devendra Joshi', status: 'pending', court: 'Rajasthan High Court', type: 'Taxation', date: '2026-04-05' },
+  { id: 'case8', caseNumber: 'SC/2026/0012', title: 'State vs. Kapoor', clientId: 'c5', clientName: 'Kabir Kapoor', status: 'active', court: 'Supreme Court of India', type: 'Criminal', date: '2026-01-02' },
+  { id: 'case9', caseNumber: 'HC/2026/9931', title: 'Reddy Builders Contract Review', clientId: 'c6', clientName: 'Sneha Reddy', status: 'active', court: 'Telangana High Court', type: 'Commercial', date: '2026-05-14' }
 ];
 
 const initialHearings = [
@@ -245,7 +244,7 @@ export const AppProvider = ({ children }) => {
     addActivity(`Client removed: ${target.name}`, 'client');
   };
 
-  const addCase = (caseNumber, title, clientId, court, type) => {
+  const addCase = (caseNumber, title, clientId, court, type, date) => {
     const client = clients.find(c => c.id === clientId);
     const newCase = {
       id: 'case_' + Date.now(),
@@ -255,7 +254,8 @@ export const AppProvider = ({ children }) => {
       clientName: client ? client.name : 'Unknown Client',
       status: 'active',
       court,
-      type
+      type,
+      date: date || new Date().toISOString().split('T')[0]
     };
     setCases(prev => [...prev, newCase]);
     addActivity(`New case created: ${caseNumber} - ${title}`, 'case');

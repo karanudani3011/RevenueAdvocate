@@ -17,11 +17,11 @@ export default function Sidebar({ currentTab, setCurrentTab }) {
   };
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'clients', label: 'Clients', icon: '👥' },
-    { id: 'cases', label: 'Cases & Files', icon: '📁' },
-    { id: 'hearings', label: 'Court Hearings', icon: '🏛️' },
-    { id: 'finance', label: 'Financials', icon: '💰' }
+    { id: 'dashboard', label: 'Dashboard',   icon: '📊' },
+    { id: 'clients',   label: 'Clients',      icon: '👥' },
+    { id: 'cases',     label: 'Cases & Files', icon: '📁' },
+    { id: 'finance',   label: 'Financials',   icon: '💰' },
+    { id: 'profile',   label: 'My Profile',   icon: '👤' },
   ];
 
   return (
