@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 
 function ChangePasswordSection() {
@@ -8,42 +8,48 @@ function ChangePasswordSection() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError]   = useState('');
   const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(''); setSuccess('');
+    setError(''); 
+    setSuccess('');
+
     if (!oldPassword || !newPassword || !confirmPassword) {
-      setError('Please fill in all fields.'); return;
+      setError('Please fill in all fields.'); 
+      return;
     }
     if (newPassword !== confirmPassword) {
-      setError('New passwords do not match.'); return;
+      setError('New passwords do not match.'); 
+      return;
     }
     if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters.'); return;
+      setError('Password must be at least 6 characters.'); 
+      return;
     }
-    const res = changePassword(oldPassword, newPassword);
+
+    setLoading(true);
+    const res = await changePassword(oldPassword, newPassword);
+    setLoading(false);
+
     if (res.success) {
       setSuccess('Password updated successfully!');
-      setOldPassword(''); setNewPassword(''); setConfirmPassword('');
-      setTimeout(() => setSuccess(''), 3000);
+      setOldPassword(''); 
+      setNewPassword(''); 
+      setConfirmPassword('');
+      setTimeout(() => setSuccess(''), 4000);
     } else {
       setError(res.message || 'Error updating password.');
     }
   };
 
   return (
-    <div style={{
-      background: 'var(--bg-primary)',
-      border: '1px solid var(--border-color)',
-      borderRadius: 'var(--radius-md)',
-      padding: '24px',
-      marginTop: '28px'
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', paddingBottom: '14px', borderBottom: '1px solid var(--border-color)' }}>
-        <span style={{ fontSize: '20px' }}>🔑</span>
+    <div className="profile-card glass-panel" style={{ marginTop: '28px' }}>
+      <div className="profile-section-header">
+        <span className="profile-section-icon">🔑</span>
         <div>
-          <h4 style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>Change Password</h4>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>Update your login credentials</p>
+          <h4 className="profile-section-title">Change Password</h4>
+          <p className="profile-section-subtitle">Update your login credentials securely</p>
         </div>
       </div>
 
@@ -59,35 +65,53 @@ function ChangePasswordSection() {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px' }}>
+        <div className="responsive-form-grid">
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Current Password</label>
             <div className="input-wrapper">
-              <input type="password" className="form-input" placeholder="Current password"
-                value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} id="chg-old-pw" />
+              <input 
+                type="password" 
+                className="form-input" 
+                placeholder="Current password"
+                value={oldPassword} 
+                onChange={(e) => setOldPassword(e.target.value)} 
+                id="chg-old-pw" 
+              />
               <span className="input-icon">🔒</span>
             </div>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">New Password</label>
             <div className="input-wrapper">
-              <input type="password" className="form-input" placeholder="New password"
-                value={newPassword} onChange={(e) => setNewPassword(e.target.value)} id="chg-new-pw" />
+              <input 
+                type="password" 
+                className="form-input" 
+                placeholder="New password"
+                value={newPassword} 
+                onChange={(e) => setNewPassword(e.target.value)} 
+                id="chg-new-pw" 
+              />
               <span className="input-icon">🔒</span>
             </div>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">Confirm Password</label>
             <div className="input-wrapper">
-              <input type="password" className="form-input" placeholder="Confirm password"
-                value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} id="chg-confirm-pw" />
+              <input 
+                type="password" 
+                className="form-input" 
+                placeholder="Confirm password"
+                value={confirmPassword} 
+                onChange={(e) => setConfirmPassword(e.target.value)} 
+                id="chg-confirm-pw" 
+              />
               <span className="input-icon">🔒</span>
             </div>
           </div>
         </div>
-        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end' }}>
-          <button type="submit" className="btn-primary" style={{ width: 'auto', padding: '10px 28px' }} id="save-pw-btn">
-            Update Password
+        <div className="profile-form-footer">
+          <button type="submit" className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }} disabled={loading}>
+            {loading ? 'Updating...' : 'Update Password'}
           </button>
         </div>
       </form>
@@ -96,163 +120,270 @@ function ChangePasswordSection() {
 }
 
 export default function Profile() {
-  const { currentUser } = useApp();
+  const { currentUser, updateProfile } = useApp();
+  const fileInputRef = useRef(null);
+
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [name, setName] = useState(currentUser?.name || '');
+  const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [licenceFile, setLicenceFile] = useState(null);
+  const [licencePreview, setLicencePreview] = useState(currentUser?.licenceImageUrl || '');
+  
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+
   if (!currentUser) return null;
 
-  const getInitials = (name) =>
-    name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-
-  const roleColor = {
-    'Super Admin (Advocate)': { from: '#2563eb', to: '#8b5cf6' },
-    'Accountant':             { from: '#10b981', to: '#3b82f6' },
+  const getInitials = (nameStr) => {
+    if (!nameStr) return '';
+    return nameStr.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
   };
-  const colors = roleColor[currentUser.role] || { from: '#3b82f6', to: '#8b5cf6' };
 
-  const infoRows = [
-    { icon: '👤', label: 'Full Name',        value: currentUser.name },
-    { icon: '🎭', label: 'Role',             value: currentUser.role },
-    { icon: '📧', label: 'Email Address',    value: currentUser.email      || 'N/A' },
-    { icon: '📱', label: 'Phone Number',     value: currentUser.phone      || 'N/A' },
-    { icon: '🪪', label: 'Bar Licence No.',  value: currentUser.licenceNumber || 'N/A' },
-    { icon: '🔐', label: 'Username',         value: currentUser.username },
-  ];
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setLicenceFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLicencePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSaveProfile = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (!name.trim()) {
+      setError('Name field cannot be left blank.');
+      return;
+    }
+
+    setLoading(true);
+    const res = await updateProfile(name, phone, licenceFile || licencePreview);
+    setLoading(false);
+
+    if (res.success) {
+      setSuccess('Profile updated successfully!');
+      setIsEditMode(false);
+      setLicenceFile(null);
+      setTimeout(() => setSuccess(''), 3000);
+    } else {
+      setError(res.message || 'Failed to update profile.');
+    }
+  };
+
+  const handleCancel = () => {
+    setName(currentUser.name || '');
+    setPhone(currentUser.phone || '');
+    setLicencePreview(currentUser.licenceImageUrl || '');
+    setLicenceFile(null);
+    setIsEditMode(false);
+    setError('');
+  };
 
   return (
-    <div className="animated-fade" style={{ maxWidth: '860px', margin: '0 auto' }}>
-
+    <div className="animated-fade profile-container">
       {/* Profile Hero Banner */}
-      <div className="glass-panel" style={{
-        position: 'relative',
-        overflow: 'hidden',
-        borderRadius: 'var(--radius-lg)',
-        marginBottom: '24px'
-      }}>
-        {/* Gradient banner */}
-        <div style={{
-          height: '120px',
-          background: `linear-gradient(135deg, ${colors.from} 0%, ${colors.to} 100%)`,
-          position: 'relative'
-        }}>
-          <div style={{
-            position: 'absolute', inset: 0,
-            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(255,255,255,0.08) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(255,255,255,0.06) 0%, transparent 50%)'
-          }} />
-          <div style={{
-            position: 'absolute', top: '16px', right: '24px',
-            fontSize: '11px', fontWeight: '700', color: 'rgba(255,255,255,0.7)',
-            textTransform: 'uppercase', letterSpacing: '1.5px'
-          }}>
-            LEXJURIS CHAMBERS — MEMBER PROFILE
+      <div className="glass-panel profile-banner-card">
+        {/* Banner Graphic Header */}
+        <div className="profile-banner-graphic">
+          <div className="profile-banner-overlay" />
+          <div className="profile-banner-meta">
+            LEXJURIS CHAMBERS — MEMBER ACCOUNT
           </div>
         </div>
 
-        <div style={{ padding: '0 32px 32px', position: 'relative' }}>
-          {/* Avatar */}
-          <div style={{
-            width: '84px', height: '84px',
-            borderRadius: '50%',
-            background: `linear-gradient(135deg, ${colors.from}, ${colors.to})`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontSize: '32px', fontWeight: '800',
-            border: '4px solid var(--bg-secondary)',
-            boxShadow: `0 8px 24px ${colors.from}40`,
-            marginTop: '-42px',
-            position: 'relative',
-            zIndex: 2
-          }}>
-            {getInitials(currentUser.name)}
+        <div className="profile-avatar-details-container">
+          {/* Avatar circle */}
+          <div className="profile-avatar-circle">
+            {getInitials(name || currentUser.name)}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '12px', flexWrap: 'wrap', gap: '16px' }}>
-            <div>
-              <h1 style={{ fontSize: '24px', fontWeight: '800', letterSpacing: '-0.5px', color: 'var(--text-primary)' }}>
+          <div className="profile-header-info-row">
+            <div style={{ flex: 1 }}>
+              <h1 className="profile-display-name">
                 {currentUser.name}
               </h1>
-              <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+              <p className="profile-display-role">
                 {currentUser.role}
               </p>
-              <div style={{ display: 'flex', gap: '8px', marginTop: '10px', flexWrap: 'wrap' }}>
-                <span style={{
-                  padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
-                  background: `${colors.from}20`, color: colors.from,
-                  border: `1px solid ${colors.from}30`, textTransform: 'uppercase', letterSpacing: '0.5px'
-                }}>
+              
+              <div className="profile-status-badges">
+                <span className="status-badge-active">
                   ✓ Active Member
                 </span>
-                <span style={{
-                  padding: '4px 12px', borderRadius: '20px', fontSize: '11px', fontWeight: '700',
-                  background: 'var(--success-bg)', color: 'var(--success)',
-                  border: '1px solid rgba(16,185,129,0.2)'
-                }}>
-                  ⚖️ {currentUser.licenceNumber || 'Registered'}
+                <span className="status-badge-licence">
+                  ⚖️ Verified Account
                 </span>
               </div>
             </div>
 
-            {/* Licence Image / Badge */}
-            <div style={{
-              width: '130px', height: '86px',
-              borderRadius: 'var(--radius-md)',
-              background: `linear-gradient(135deg, ${colors.from}15, ${colors.to}15)`,
-              border: `2px dashed ${colors.from}40`,
-              display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: '4px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-            }}
-              title="Licence / ID Card"
-            >
-              <span style={{ fontSize: '28px' }}>🪪</span>
-              <span style={{ fontSize: '10px', fontWeight: '600', color: 'var(--text-muted)', textAlign: 'center', lineHeight: '1.3' }}>
-                BAR ID CARD<br />
-                <span style={{ color: colors.from }}>View / Upload</span>
-              </span>
+            {/* Toggle View / Edit */}
+            <div>
+              {!isEditMode ? (
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  onClick={() => setIsEditMode(true)}
+                  style={{ width: 'auto', padding: '8px 18px', fontSize: '13px' }}
+                >
+                  ✏️ Edit Profile
+                </button>
+              ) : (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    className="btn-secondary" 
+                    onClick={handleCancel}
+                    style={{ width: 'auto', padding: '8px 18px', fontSize: '13px' }}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-primary" 
+                    onClick={handleSaveProfile}
+                    disabled={loading}
+                    style={{ width: 'auto', padding: '8px 18px', fontSize: '13px' }}
+                  >
+                    {loading ? 'Saving...' : '💾 Save'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* Info Cards Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
-        gap: '16px',
-        marginBottom: '4px'
-      }}>
-        {infoRows.map(row => (
-          <div key={row.label} className="glass-panel" style={{
-            padding: '18px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '14px',
-            borderRadius: 'var(--radius-md)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-            cursor: 'default'
-          }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = ''; }}
-          >
-            <div style={{
-              width: '42px', height: '42px', borderRadius: '10px', flexShrink: 0,
-              background: `linear-gradient(135deg, ${colors.from}18, ${colors.to}18)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '20px'
-            }}>
-              {row.icon}
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <p style={{ fontSize: '11px', fontWeight: '700', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '3px' }}>
-                {row.label}
-              </p>
-              <p style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {row.value}
-              </p>
+      {error && (
+        <div className="error-message" style={{ margin: '16px 0' }}>
+          <span>⚠️</span> {error}
+        </div>
+      )}
+      {success && (
+        <div className="success-message" style={{ margin: '16px 0' }}>
+          <span>✅</span> {success}
+        </div>
+      )}
+
+      {/* Main Details Panel */}
+      <div className="profile-details-grid">
+        {/* Info Column */}
+        <div className="profile-card glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div className="profile-section-header" style={{ marginBottom: '8px' }}>
+            <span style={{ fontSize: '20px' }}>📋</span>
+            <div>
+              <h4 className="profile-section-title">Personal Details</h4>
+              <p className="profile-section-subtitle">Account information details</p>
             </div>
           </div>
-        ))}
+
+          <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Full Name */}
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Full Name</label>
+              {isEditMode ? (
+                <div className="input-wrapper">
+                  <input 
+                    type="text" 
+                    className="form-input" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)} 
+                    required 
+                  />
+                  <span className="input-icon">👤</span>
+                </div>
+              ) : (
+                <div className="profile-static-value">{currentUser.name}</div>
+              )}
+            </div>
+
+            {/* Email (Always Read-only) */}
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Email Address</label>
+              <div className="profile-static-value text-muted-value">{currentUser.email || 'N/A'}</div>
+            </div>
+
+            {/* Phone Number */}
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Phone Number</label>
+              {isEditMode ? (
+                <div className="input-wrapper">
+                  <input 
+                    type="tel" 
+                    className="form-input" 
+                    value={phone} 
+                    onChange={(e) => setPhone(e.target.value)} 
+                  />
+                  <span className="input-icon">📱</span>
+                </div>
+              ) : (
+                <div className="profile-static-value">{currentUser.phone || 'Not Specified'}</div>
+              )}
+            </div>
+
+            {/* Account Role */}
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Security Role</label>
+              <div className="profile-static-value text-muted-value">{currentUser.role}</div>
+            </div>
+          </form>
+        </div>
+
+        {/* Licence Column */}
+        <div className="profile-card glass-panel" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div className="profile-section-header">
+            <span style={{ fontSize: '20px' }}>🪪</span>
+            <div>
+              <h4 className="profile-section-title">Licence Verification</h4>
+              <p className="profile-section-subtitle">Registered Bar Council identification image</p>
+            </div>
+          </div>
+
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '14px' }}>
+            {licencePreview ? (
+              <div className="profile-licence-preview-container">
+                <img 
+                  src={licencePreview} 
+                  alt="Licence ID Card" 
+                  className="profile-licence-card-img" 
+                />
+              </div>
+            ) : (
+              <div className="profile-licence-placeholder">
+                <span>🪪</span>
+                <p>No licence card uploaded</p>
+              </div>
+            )}
+
+            {isEditMode && (
+              <div>
+                <button 
+                  type="button" 
+                  className="btn-secondary" 
+                  onClick={() => fileInputRef.current.click()}
+                  style={{ width: 'auto', padding: '8px 16px', fontSize: '13px' }}
+                >
+                  📷 Upload New Image
+                </button>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  accept="image/*" 
+                  style={{ display: 'none' }} 
+                  onChange={handleFileChange} 
+                />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Change Password — only shown in Profile */}
+      {/* Change Password Block */}
       <ChangePasswordSection />
     </div>
   );

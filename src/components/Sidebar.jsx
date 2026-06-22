@@ -8,8 +8,10 @@ export default function Sidebar({ currentTab, setCurrentTab }) {
 
   // Get initials for avatar
   const getInitials = (name) => {
+    if (!name) return 'U';
     return name
       .split(' ')
+      .filter(Boolean)
       .map((n) => n[0])
       .join('')
       .slice(0, 2)
@@ -39,8 +41,8 @@ export default function Sidebar({ currentTab, setCurrentTab }) {
           {getInitials(currentUser.name)}
         </div>
         <div className="user-info">
-          <span className="user-name">{currentUser.name}</span>
-          <span className="user-role">{currentUser.role.split(' ')[0]}</span>
+          <span className="user-name">{currentUser.name || 'User'}</span>
+          <span className="user-role">{(currentUser.role || 'Advocate').split(' ')[0]}</span>
         </div>
       </div>
 

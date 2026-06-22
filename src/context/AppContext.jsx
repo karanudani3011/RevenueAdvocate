@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase, isSupabaseConfigured } from '../supabaseClient';
 
 const AppContext = createContext();
 
 const initialUsers = {
-  admin: { username: 'admin', password: 'admin123', role: 'Super Admin (Advocate)', name: 'Adv. Karan Sharma', securityAnswer: 'delhi', email: 'karan.sharma@lexjuris.in', phone: '+91 98101 23456', licenceNumber: 'BAR/DL/2018/04821' },
-  accountant: { username: 'accountant', password: 'accountant123', role: 'Accountant', name: 'Neelam Sen', securityAnswer: 'bangalore', email: 'neelam.sen@lexjuris.in', phone: '+91 99203 87654', licenceNumber: 'N/A' }
+  admin: { username: 'admin', password: 'admin123', role: 'Super Admin (Advocate)', name: 'Adv. Karan Sharma', securityAnswer: 'delhi', email: 'karan.sharma@lexjuris.in', phone: '+91 98101 23456', licenceNumber: 'BAR/DL/2018/04821', licenceImageUrl: '' },
+  accountant: { username: 'accountant', password: 'accountant123', role: 'Accountant', name: 'Neelam Sen', securityAnswer: 'bangalore', email: 'neelam.sen@lexjuris.in', phone: '+91 99203 87654', licenceNumber: 'N/A', licenceImageUrl: '' }
 };
 
 const getTodayDateString = (offsetDays = 0) => {
@@ -84,6 +85,65 @@ export const AppProvider = ({ children }) => {
     return saved || 'dark';
   });
 
+  // Supabase Auth State Synchronization
+  useEffect(() => {
+    if (!isSupabaseConfigured) return;
+
+    // Get current session on load
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single()
+          .then(({ data: profile }) => {
+            if (profile) {
+              setCurrentUser({
+                id: session.user.id,
+                username: session.user.email,
+                email: session.user.email,
+                role: profile.role || 'Advocate',
+                name: profile.name,
+                phone: profile.phone_number || '',
+                licenceImageUrl: profile.licence_image_url || '',
+                licenceNumber: 'N/A'
+              });
+            }
+          });
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', session.user.id)
+          .single();
+
+        if (profile) {
+          setCurrentUser({
+            id: session.user.id,
+            username: session.user.email,
+            email: session.user.email,
+            role: profile.role || 'Advocate',
+            name: profile.name,
+            phone: profile.phone_number || '',
+            licenceImageUrl: profile.licence_image_url || '',
+            licenceNumber: 'N/A'
+          });
+        }
+      } else {
+        setCurrentUser(null);
+      }
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
+
   // Business Entities State
   const [clients, setClients] = useState(() => {
     const saved = localStorage.getItem('adv_clients');
@@ -145,46 +205,277 @@ export const AppProvider = ({ children }) => {
   }, [activities]);
 
   // Auth Operations
-  const login = (username, password) => {
-    const matchedUser = usersList[username.toLowerCase().trim()];
-    if (matchedUser && matchedUser.password === password) {
-      const userSession = {
-        username: matchedUser.username,
-        role: matchedUser.role,
-        name: matchedUser.name
-      };
-      setCurrentUser(userSession);
-      addActivity(`User ${matchedUser.name} (${matchedUser.role}) logged in`, 'auth');
-      return { success: true };
+  // Auth Operations
+  const signUp = async (name, email, password, phone, licenceImageFile) => {
+    if (isSupabaseConfigured) {
+      try {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+          email,
+          password,
+        });
+
+        if (authError) throw authError;
+        const userId = authData.user?.id;
+        if (!userId) throw new Error('Sign up failed: No user ID returned.');
+
+        let licenceImageUrl = '';
+        if (licenceImageFile) {
+          const fileExt = licenceImageFile.name.split('.').pop();
+          const fileName = `${userId}-${Date.now()}.${fileExt}`;
+          const filePath = `licence_${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('licences')
+            .upload(filePath, licenceImageFile);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('licences')
+            .getPublicUrl(filePath);
+
+          licenceImageUrl = publicUrl;
+        }
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            name,
+            email,
+            phone_number: phone,
+            licence_image_url: licenceImageUrl,
+            role: 'Advocate'
+          });
+
+        if (profileError) throw profileError;
+
+        return { success: true, message: 'Account registered successfully!' };
+      } catch (error) {
+        return { success: false, message: error.message };
+      }
+    } else {
+      // Local Mock fallback
+      try {
+        const username = email.toLowerCase().trim();
+        if (usersList[username]) {
+          return { success: false, message: 'An account with this email already exists.' };
+        }
+
+        let licenceImageUrl = '';
+        if (licenceImageFile) {
+          licenceImageUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(licenceImageFile);
+          });
+        }
+
+        const newUserObj = {
+          username,
+          email,
+          password,
+          role: 'Advocate',
+          name,
+          phone,
+          licenceNumber: 'N/A',
+          licenceImageUrl,
+          securityAnswer: 'delhi'
+        };
+
+        setUsersList(prev => ({
+          ...prev,
+          [username]: newUserObj
+        }));
+
+        setCurrentUser(newUserObj);
+        addActivity(`New Advocate account registered: ${name}`, 'auth');
+        return { success: true };
+      } catch (err) {
+        return { success: false, message: 'Failed to process licence image: ' + err.message };
+      }
     }
-    return { success: false, message: 'Invalid username or password' };
   };
 
-  const logout = () => {
+  const login = async (emailOrUsername, password) => {
+    const input = emailOrUsername.toLowerCase().trim();
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: input,
+          password
+        });
+        if (error) throw error;
+        
+        const { data: profile, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+          
+        if (profileError) throw profileError;
+        
+        const userSession = {
+          id: data.user.id,
+          username: data.user.email,
+          email: data.user.email,
+          role: profile.role || 'Advocate',
+          name: profile.name,
+          phone: profile.phone_number || '',
+          licenceImageUrl: profile.licence_image_url || '',
+          licenceNumber: 'N/A'
+        };
+        setCurrentUser(userSession);
+        addActivity(`User ${profile.name} logged in`, 'auth');
+        return { success: true };
+      } catch (error) {
+        return { success: false, message: error.message };
+      }
+    } else {
+      const matchedUser = Object.values(usersList).find(
+        u => u.username?.toLowerCase() === input || u.email?.toLowerCase() === input
+      );
+
+      if (matchedUser && matchedUser.password === password) {
+        setCurrentUser(matchedUser);
+        addActivity(`User ${matchedUser.name} logged in`, 'auth');
+        return { success: true };
+      }
+      return { success: false, message: 'Invalid email/username or password' };
+    }
+  };
+
+  const logout = async () => {
+    if (isSupabaseConfigured) {
+      await supabase.auth.signOut();
+    }
     if (currentUser) {
       addActivity(`User ${currentUser.name} logged out`, 'auth');
     }
     setCurrentUser(null);
   };
 
-  const changePassword = (oldPassword, newPassword) => {
-    if (!currentUser) return { success: false, message: 'Not logged in' };
-    const username = currentUser.username.toLowerCase();
-    const activeUserData = usersList[username];
-    
-    if (activeUserData.password !== oldPassword) {
-      return { success: false, message: 'Incorrect old password' };
-    }
-
-    setUsersList(prev => ({
-      ...prev,
-      [username]: {
-        ...prev[username],
-        password: newPassword
+  const changePassword = async (oldPassword, newPassword) => {
+    if (isSupabaseConfigured) {
+      try {
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword
+        });
+        if (error) throw error;
+        addActivity(`${currentUser.name} successfully changed their password`, 'auth');
+        return { success: true };
+      } catch (error) {
+        return { success: false, message: error.message };
       }
-    }));
-    addActivity(`${currentUser.name} successfully changed their password`, 'auth');
-    return { success: true };
+    } else {
+      if (!currentUser) return { success: false, message: 'Not logged in' };
+      const username = currentUser.username.toLowerCase();
+      const activeUserData = usersList[username];
+      
+      if (activeUserData.password !== oldPassword) {
+        return { success: false, message: 'Incorrect old password' };
+      }
+
+      setUsersList(prev => ({
+        ...prev,
+        [username]: {
+          ...prev[username],
+          password: newPassword
+        }
+      }));
+      setCurrentUser(prev => ({ ...prev, password: newPassword }));
+      addActivity(`${currentUser.name} successfully changed their password`, 'auth');
+      return { success: true };
+    }
+  };
+
+  const updateProfile = async (name, phone, licenceImageFile) => {
+    if (!currentUser) return { success: false, message: 'Not logged in' };
+
+    if (isSupabaseConfigured) {
+      try {
+        let licenceImageUrl = currentUser.licenceImageUrl || '';
+
+        if (licenceImageFile instanceof File) {
+          const fileExt = licenceImageFile.name.split('.').pop();
+          const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+          const filePath = `licence_${fileName}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('licences')
+            .upload(filePath, licenceImageFile);
+
+          if (uploadError) throw uploadError;
+
+          const { data: { publicUrl } } = supabase.storage
+            .from('licences')
+            .getPublicUrl(filePath);
+
+          licenceImageUrl = publicUrl;
+        }
+
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            name,
+            phone_number: phone,
+            licence_image_url: licenceImageUrl,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', currentUser.id);
+
+        if (updateError) throw updateError;
+
+        setCurrentUser(prev => ({
+          ...prev,
+          name,
+          phone,
+          licenceImageUrl
+        }));
+
+        addActivity(`${name} updated their profile info`, 'auth');
+        return { success: true };
+      } catch (error) {
+        return { success: false, message: error.message };
+      }
+    } else {
+      try {
+        const username = currentUser.username.toLowerCase();
+        let licenceImageUrl = currentUser.licenceImageUrl || '';
+
+        if (licenceImageFile instanceof File) {
+          licenceImageUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(licenceImageFile);
+          });
+        }
+
+        setUsersList(prev => ({
+          ...prev,
+          [username]: {
+            ...prev[username],
+            name,
+            phone,
+            licenceImageUrl
+          }
+        }));
+
+        setCurrentUser(prev => ({
+          ...prev,
+          name,
+          phone,
+          licenceImageUrl
+        }));
+
+        addActivity(`${name} updated their profile info`, 'auth');
+        return { success: true };
+      } catch (err) {
+        return { success: false, message: 'Failed to process licence image: ' + err.message };
+      }
+    }
   };
 
   const forgotPassword = (username, securityAnswer, newPassword) => {
@@ -337,7 +628,10 @@ export const AppProvider = ({ children }) => {
       addHearing,
       deleteHearing,
       addPayment,
-      deletePayment
+      deletePayment,
+      signUp,
+      updateProfile,
+      isSupabaseConfigured
     }}>
       {children}
     </AppContext.Provider>
