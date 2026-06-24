@@ -4,7 +4,7 @@ import StatsCard from './StatsCard';
 import Charts from './Charts';
 
 export default function Dashboard({ setCurrentTab }) {
-  const { clients, cases, hearings, payments, activities, currentUser } = useApp();
+  const { clients, cases, hearings, payments, activities, currentUser, t } = useApp();
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -43,37 +43,37 @@ export default function Dashboard({ setCurrentTab }) {
       {/* Metrics Row 1: Clients & Cases */}
       <div className="metrics-grid">
         <StatsCard
-          title="Total Clients"
+          title={t("Total Clients")}
           value={totalClients}
           icon="👥"
-          trend={{ type: 'up', value: '4.8%', label: 'vs last month' }}
+          trend={{ type: 'up', value: '4.8%', label: t('vs last month') }}
           accentColor="var(--primary)"
           bgGlow="var(--primary-glow)"
           onClick={() => setCurrentTab('clients')}
         />
         <StatsCard
-          title="Active Cases"
+          title={t("Active Cases")}
           value={activeCases}
           icon="📁"
-          trend={{ type: 'neutral', value: 'Active', label: 'litigations' }}
+          trend={{ type: 'neutral', value: t('Active'), label: t('litigations') }}
           accentColor="var(--success)"
           bgGlow="var(--success-bg)"
           onClick={() => setCurrentTab('cases')}
         />
         <StatsCard
-          title="Closed Cases"
+          title={t("Closed Cases")}
           value={closedCases}
           icon="✅"
-          trend={{ type: 'neutral', value: 'Settled', label: 'verdicts' }}
+          trend={{ type: 'neutral', value: t('Settled'), label: t('verdicts') }}
           accentColor="var(--text-muted)"
           bgGlow="rgba(0,0,0,0.02)"
           onClick={() => setCurrentTab('cases')}
         />
         <StatsCard
-          title="Pending Cases"
+          title={t("Pending Cases")}
           value={pendingCases}
           icon="⏳"
-          trend={{ type: 'neutral', value: 'Awaiting', label: 'hearing' }}
+          trend={{ type: 'neutral', value: t('Awaiting'), label: t('hearing') }}
           accentColor="var(--warning)"
           bgGlow="var(--warning-bg)"
           onClick={() => setCurrentTab('cases')}
@@ -83,37 +83,37 @@ export default function Dashboard({ setCurrentTab }) {
       {/* Metrics Row 2: Financials */}
       <div className="metrics-grid">
         <StatsCard
-          title="Total Credit Amount"
+          title={t("Total Credit Amount")}
           value={`₹${totalCredit.toLocaleString()}`}
           icon="💰"
-          trend={{ type: 'up', value: 'Receipts', label: 'earned' }}
+          trend={{ type: 'up', value: t('Receipts'), label: t('earned') }}
           accentColor="var(--success)"
           bgGlow="var(--success-bg)"
           onClick={() => setCurrentTab('finance')}
         />
         <StatsCard
-          title="Total Debit Amount"
+          title={t("Total Debit Amount")}
           value={`₹${totalDebit.toLocaleString()}`}
           icon="💸"
-          trend={{ type: 'down', value: 'Expenses', label: 'paid' }}
+          trend={{ type: 'down', value: t('Expenses'), label: t('paid') }}
           accentColor="var(--danger)"
           bgGlow="var(--danger-bg)"
           onClick={() => setCurrentTab('finance')}
         />
         <StatsCard
-          title="Pending Payments"
+          title={t("Pending Payments")}
           value={`₹${pendingPayments.toLocaleString()}`}
           icon="⏳"
-          trend={{ type: 'neutral', value: 'Receivables', label: 'bills' }}
+          trend={{ type: 'neutral', value: t('Receivables'), label: t('bills') }}
           accentColor="var(--warning)"
           bgGlow="var(--warning-bg)"
           onClick={() => setCurrentTab('finance')}
         />
         <StatsCard
-          title="Monthly Revenue Balance"
+          title={t("Monthly Revenue Balance")}
           value={`₹${netRevenue.toLocaleString()}`}
           icon="📈"
-          trend={{ type: 'up', value: 'Net Profit', label: 'June' }}
+          trend={{ type: 'up', value: t('Net Profit'), label: t('June') }}
           accentColor="var(--primary)"
           bgGlow="var(--primary-glow)"
           onClick={() => setCurrentTab('finance')}
@@ -128,7 +128,7 @@ export default function Dashboard({ setCurrentTab }) {
         {/* Recent Activities */}
         <div className="panel-card glass-panel">
           <div className="panel-header">
-            <h3 className="panel-title">🔔 Recent Activities Log</h3>
+            <h3 className="panel-title">🔔 {t("Recent Activities Log")}</h3>
           </div>
           <div className="activities-list">
             {activities.slice(0, 8).map(act => (

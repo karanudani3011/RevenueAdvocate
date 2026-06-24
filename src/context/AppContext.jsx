@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../supabaseClient';
+import { translations } from '../translations';
 
 const AppContext = createContext();
 
@@ -15,25 +16,21 @@ const getTodayDateString = (offsetDays = 0) => {
 };
 
 const initialClients = [
-  { id: 'c1', name: 'Aarav Mehta', email: 'aarav@gmail.com', phone: '+91 98765 43210', address: 'Connaught Place, New Delhi' },
-  { id: 'c2', name: 'Priya Patel', email: 'priya@yahoo.com', phone: '+91 87654 32109', address: 'Andheri West, Mumbai' },
-  { id: 'c3', name: 'Vikram Singh', email: 'vikram@outlook.com', phone: '+91 76543 21098', address: 'Salt Lake, Kolkata' },
-  { id: 'c4', name: 'Ananya Iyer', email: 'ananya@gmail.com', phone: '+91 65432 10987', address: 'Indiranagar, Bangalore' },
-  { id: 'c5', name: 'Kabir Kapoor', email: 'kabir@kapoor.com', phone: '+91 99887 76655', address: 'Bandra, Mumbai' },
-  { id: 'c6', name: 'Sneha Reddy', email: 'sneha@reddy.com', phone: '+91 88776 65544', address: 'Gachibowli, Hyderabad' },
-  { id: 'c7', name: 'Devendra Joshi', email: 'dev@joshi.org', phone: '+91 77665 54433', address: 'C-Scheme, Jaipur' }
+  { id: 'c1', regDate: '2026-01-04', number: '246', caseType: 'ડી.એ. દાખલ', name: 'લાલુ આસુરામ હરીજન', courtName: 'એડિ. કલે. સા. પૂર્વ', caseDetails: '૧૨૨ના હુકમ સામે અપીલ', advocateName: 'કે.પી. ઉદાણી', fee: '25000' },
+  { id: 'c2', regDate: '2026-01-07', number: '1739', caseType: 'ઈ.પી.એમ.સી.', name: 'દીપરાજ', courtName: 'એડિ. કલે. સા. પૂર્વ', caseDetails: 'ખાતા નંબર 419, ક્ષેત્રફળ ૧૮-૨ ઈ.પી. ૨૦૨૪', advocateName: 'કે.પી. ઉદાણી', fee: '50000' },
+  { id: 'c3', regDate: '2026-01-09', number: '4619', caseType: 'વકીલાત', name: 'નરેશ', courtName: 'મામલતદાર સાહેબ ભુજ', caseDetails: 'ખાતા નંબર ૨૩૨, હે.૧૦.૧૪.૪૬, પ્ર.એચ.૨-૨૪-૯૩', advocateName: 'કે.પી. ઉદાણી', fee: '35000' },
+  { id: 'c4', regDate: '2026-01-09', number: '3392', caseType: 'હક્કપત્રક', name: 'માવજી', courtName: 'મામલતદાર સાહેબ ભુજ', caseDetails: 'ખાતા નંબર ૧૬૬, રે.સર્વે. ૨૧૨, ૧૨૩, ક્ષેત્રફળ ૨૯.૨૬.૦૭', advocateName: 'કે.પી. ઉદાણી', fee: '15000' },
+  { id: 'c5', regDate: '2026-01-12', number: '1427', caseType: 'ટી.એસ. દાખલ', name: 'મુકેશ', courtName: 'મામલતદાર સાહેબ અંજાર', caseDetails: 'ખાતા નંબર ૧૨૫, રે.સર્વે. ૧૫૮, ૧૬૧', advocateName: 'કે.પી. ઉદાણી', fee: '45000' },
+  { id: 'c6', regDate: '2026-01-20', number: '1517', caseType: 'હક્કપત્રક', name: 'હરિલાલ', courtName: 'મામલતદાર સાહેબ રાપર', caseDetails: 'ખાતા નંબર ૩૪૫, રે.સર્વે. ૬૬, ૭૫', advocateName: 'કે.પી. ઉદાણી', fee: '30000' }
 ];
 
 const initialCases = [
-  { id: 'case1', caseNumber: 'SC/2026/1024', title: 'Mehta vs. Tech Solutions', clientId: 'c1', clientName: 'Aarav Mehta', status: 'active', court: 'Supreme Court of India', type: 'Civil', date: '2026-01-15' },
-  { id: 'case2', caseNumber: 'HC/2025/4412', title: 'Priya Patel Property Dispute', clientId: 'c2', clientName: 'Priya Patel', status: 'active', court: 'Bombay High Court', type: 'Property', date: '2025-11-08' },
-  { id: 'case3', caseNumber: 'DC/2024/0987', title: 'Vikram Singh Labor Case', clientId: 'c3', clientName: 'Vikram Singh', status: 'closed', court: 'Delhi District Court', type: 'Labor', date: '2024-09-22' },
-  { id: 'case4', caseNumber: 'HC/2026/1209', title: 'Ananya Iyer Contract Dispute', clientId: 'c4', clientName: 'Ananya Iyer', status: 'pending', court: 'Karnataka High Court', type: 'Commercial', date: '2026-02-10' },
-  { id: 'case5', caseNumber: 'SC/2025/3089', title: 'Kabir Kapoor Criminal Appeal', clientId: 'c5', clientName: 'Kabir Kapoor', status: 'active', court: 'Supreme Court of India', type: 'Criminal', date: '2025-07-30' },
-  { id: 'case6', caseNumber: 'DC/2025/5512', title: 'Sneha Reddy Divorce Settlement', clientId: 'c6', clientName: 'Sneha Reddy', status: 'closed', court: 'Family Court, Hyderabad', type: 'Family', date: '2025-03-18' },
-  { id: 'case7', caseNumber: 'HC/2026/0441', title: 'Joshi Tax Evading Appeal', clientId: 'c7', clientName: 'Devendra Joshi', status: 'pending', court: 'Rajasthan High Court', type: 'Taxation', date: '2026-04-05' },
-  { id: 'case8', caseNumber: 'SC/2026/0012', title: 'State vs. Kapoor', clientId: 'c5', clientName: 'Kabir Kapoor', status: 'active', court: 'Supreme Court of India', type: 'Criminal', date: '2026-01-02' },
-  { id: 'case9', caseNumber: 'HC/2026/9931', title: 'Reddy Builders Contract Review', clientId: 'c6', clientName: 'Sneha Reddy', status: 'active', court: 'Telangana High Court', type: 'Commercial', date: '2026-05-14' }
+  { id: 'case1', filingDate: '2026-01-09', respondent: 'અમરાભાઈ ભીમાભાઈ કોલી', petitioner: 'જીવરાજભાઈ નારણભાઈ રબારી', propertyDetails: 'નાણી(મોટી) ગામના રે.સર્વે નંબર ૬૬૭, ક્ષેત્રફળ ૨.૧૧.૦૫ હે.', village: 'નાણી(મોટી)', status: 'active', remarks: 'દાખલ', signature: '' },
+  { id: 'case2', filingDate: '2026-01-12', respondent: 'ગોવિંદભાઈ મોહનલાલ સૂર્યાણી', petitioner: 'અમરાભાઈ ભીમાભાઈ', propertyDetails: 'ગોધરા ગામના રે.સર્વે નંબર ૫૧૭, ક્ષેત્રફળ ૩.૪૭.૨૧ હે.', village: 'ગોધરા', status: 'active', remarks: 'દાખલ', signature: '' },
+  { id: 'case3', filingDate: '2026-01-22', respondent: 'ખેંગારભાઈ વાલજીભાઈ કોલી', petitioner: 'મેરૂભાઈ કાનાભાઈ બળિયા', propertyDetails: 'ગોધરા ગામના રે.સર્વે નંબર ૧૪૩, ક્ષેત્રફળ ૨.૪૦.૦૦ હે.', village: 'ગોધરા', status: 'active', remarks: 'દાખલ', signature: '' },
+  { id: 'case4', filingDate: '2026-02-02', respondent: 'લાલજીભાઈ નારાણભાઈ પ્રજાપતિ', petitioner: 'અમરાભાઈ મોહનભાઈ', propertyDetails: 'મોડસર ગામના રે.સર્વે નંબર ૨૨૭, ક્ષેત્રફળ ૩.૪૫.૦૦ હે.', village: 'મોડસર', status: 'pending', remarks: 'દાખલ', signature: '' },
+  { id: 'case5', filingDate: '2026-02-11', respondent: 'ભીમજીભાઈ નથુભાઈ લાલજી', petitioner: 'મંગલસિંહ અજીતસિંહ વાઘેલા', propertyDetails: 'કોટડા ગામના રે.સર્વે નંબર ૧૫૬, ક્ષેત્રફળ ૧.૯૮.૦૦ હે.', village: 'કોટડા', status: 'pending', remarks: 'દાખલ', signature: '' },
+  { id: 'case6', filingDate: '2026-02-28', respondent: 'અમરાભાઈ કાનજીભાઈ મહેશ્વરી', petitioner: 'હર્ષદલાલ રામજીલાલ વ્યાસ', propertyDetails: 'નાણી(મોટી) ગામના રે.સર્વે નંબર ૨૪૭, ક્ષેત્રફળ ૨.૫૦.૦૦ હે.', village: 'નાણી(મોટી)', status: 'closed', remarks: 'બંધ', signature: '' }
 ];
 
 const initialHearings = [
@@ -80,10 +77,23 @@ export const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : initialUsers;
   });
 
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('adv_theme');
-    return saved || 'dark';
+  const theme = 'light';
+
+  const [language, setLanguage] = useState(() => {
+    const saved = localStorage.getItem('adv_language');
+    return saved || 'en';
   });
+
+  useEffect(() => {
+    localStorage.setItem('adv_language', language);
+  }, [language]);
+
+  const t = (key) => {
+    if (language === 'gu' && translations.gu[key]) {
+      return translations.gu[key];
+    }
+    return key;
+  };
 
   // Supabase Auth State Synchronization
   useEffect(() => {
@@ -516,16 +526,20 @@ export const AppProvider = ({ children }) => {
   };
 
   // CRUD Operations
-  const addClient = (name, email, phone, address) => {
+  const addClient = (regDate, number, caseType, name, courtName, caseDetails, advocateName, fee) => {
     const newClient = {
       id: 'c_' + Date.now(),
+      regDate,
+      number,
+      caseType,
       name,
-      email,
-      phone,
-      address
+      courtName,
+      caseDetails,
+      advocateName,
+      fee
     };
     setClients(prev => [...prev, newClient]);
-    addActivity(`New client registered: ${name}`, 'client');
+    addActivity(`New case register entry: ${name} (${number})`, 'client');
   };
 
   const deleteClient = (id) => {
@@ -535,41 +549,44 @@ export const AppProvider = ({ children }) => {
     addActivity(`Client removed: ${target.name}`, 'client');
   };
 
-  const addCase = (caseNumber, title, clientId, court, type, date) => {
-    const client = clients.find(c => c.id === clientId);
+  const addCase = (filingDate, respondent, petitioner, propertyDetails, village, status, remarks) => {
     const newCase = {
       id: 'case_' + Date.now(),
-      caseNumber,
-      title,
-      clientId,
-      clientName: client ? client.name : 'Unknown Client',
-      status: 'active',
-      court,
-      type,
-      date: date || new Date().toISOString().split('T')[0]
+      filingDate: filingDate || new Date().toISOString().split('T')[0],
+      respondent,
+      petitioner,
+      propertyDetails,
+      village,
+      status: status || 'active',
+      remarks: remarks || 'દાખલ'
     };
     setCases(prev => [...prev, newCase]);
-    addActivity(`New case created: ${caseNumber} - ${title}`, 'case');
+    addActivity(`New case filed: ${petitioner} vs ${respondent} (${village})`, 'case');
   };
 
   const updateCaseStatus = (id, status) => {
     setCases(prev => prev.map(c => c.id === id ? { ...c, status } : c));
     const target = cases.find(c => c.id === id);
-    addActivity(`Case ${target ? target.caseNumber : id} status updated to ${status}`, 'case');
+    const label = target ? `${target.petitioner} vs ${target.respondent}` : id;
+    addActivity(`Case "${label}" status updated to ${status}`, 'case');
   };
 
   const deleteCase = (id) => {
     const target = cases.find(c => c.id === id);
+    const label = target ? `${target.petitioner} vs ${target.respondent}` : id;
     setCases(prev => prev.filter(c => c.id !== id));
-    addActivity(`Case ${target ? target.caseNumber : id} removed`, 'case');
+    addActivity(`Case "${label}" removed`, 'case');
   };
 
   const addHearing = (caseId, date, time, room, judge) => {
     const matchedCase = cases.find(c => c.id === caseId);
+    const caseName = matchedCase
+      ? `${matchedCase.petitioner} vs ${matchedCase.respondent}`
+      : 'General Briefing';
     const newHearing = {
       id: 'h_' + Date.now(),
       caseId,
-      caseName: matchedCase ? matchedCase.title : 'General Briefing',
+      caseName,
       date,
       time,
       room,
@@ -577,7 +594,7 @@ export const AppProvider = ({ children }) => {
       status: 'scheduled'
     };
     setHearings(prev => [...prev, newHearing]);
-    addActivity(`Hearing scheduled for "${newHearing.caseName}" on ${date}`, 'hearing');
+    addActivity(`Hearing scheduled for "${caseName}" on ${date}`, 'hearing');
   };
 
   const deleteHearing = (id) => {
@@ -606,6 +623,13 @@ export const AppProvider = ({ children }) => {
     addActivity(`Transaction record of ₹${target ? target.amount : ''} removed`, 'payment');
   };
 
+  const updateCaseSignature = (id, signatureDataUrl) => {
+    setCases(prev => prev.map(c => c.id === id ? { ...c, signature: signatureDataUrl } : c));
+    const target = cases.find(c => c.id === id);
+    const label = target ? `${target.petitioner} vs ${target.respondent}` : id;
+    addActivity(`Signature added to case: ${label}`, 'case');
+  };
+
   return (
     <AppContext.Provider value={{
       currentUser,
@@ -625,13 +649,17 @@ export const AppProvider = ({ children }) => {
       addCase,
       updateCaseStatus,
       deleteCase,
+      updateCaseSignature,
       addHearing,
       deleteHearing,
       addPayment,
       deletePayment,
       signUp,
       updateProfile,
-      isSupabaseConfigured
+      isSupabaseConfigured,
+      language,
+      setLanguage,
+      t
     }}>
       {children}
     </AppContext.Provider>

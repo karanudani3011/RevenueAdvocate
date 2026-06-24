@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 
 function ChangePasswordSection() {
-  const { changePassword } = useApp();
+  const { changePassword, t } = useApp();
   const [oldPassword, setOldPassword]         = useState('');
   const [newPassword, setNewPassword]         = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -16,15 +16,15 @@ function ChangePasswordSection() {
     setSuccess('');
 
     if (!oldPassword || !newPassword || !confirmPassword) {
-      setError('Please fill in all fields.'); 
+      setError(t('Please fill in all fields.') || 'Please fill in all fields.'); 
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError('New passwords do not match.'); 
+      setError(t('New passwords do not match.') || 'New passwords do not match.'); 
       return;
     }
     if (newPassword.length < 6) {
-      setError('Password must be at least 6 characters.'); 
+      setError(t('Password must be at least 6 characters.') || 'Password must be at least 6 characters.'); 
       return;
     }
 
@@ -33,13 +33,13 @@ function ChangePasswordSection() {
     setLoading(false);
 
     if (res.success) {
-      setSuccess('Password updated successfully!');
+      setSuccess(t('Password updated successfully!') || 'Password updated successfully!');
       setOldPassword(''); 
       setNewPassword(''); 
       setConfirmPassword('');
       setTimeout(() => setSuccess(''), 4000);
     } else {
-      setError(res.message || 'Error updating password.');
+      setError(res.message || t('Error updating password.'));
     }
   };
 
@@ -48,8 +48,8 @@ function ChangePasswordSection() {
       <div className="profile-section-header">
         <span className="profile-section-icon">🔑</span>
         <div>
-          <h4 className="profile-section-title">Change Password</h4>
-          <p className="profile-section-subtitle">Update your login credentials securely</p>
+          <h4 className="profile-section-title">{t('Change Password')}</h4>
+          <p className="profile-section-subtitle">{t('Update your login credentials securely')}</p>
         </div>
       </div>
 
@@ -67,12 +67,12 @@ function ChangePasswordSection() {
       <form onSubmit={handleSubmit}>
         <div className="responsive-form-grid">
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Current Password</label>
+            <label className="form-label">{t('Current Password')}</label>
             <div className="input-wrapper">
               <input 
                 type="password" 
                 className="form-input" 
-                placeholder="Current password"
+                placeholder={t('Current Password')}
                 value={oldPassword} 
                 onChange={(e) => setOldPassword(e.target.value)} 
                 id="chg-old-pw" 
@@ -81,12 +81,12 @@ function ChangePasswordSection() {
             </div>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">New Password</label>
+            <label className="form-label">{t('New Password')}</label>
             <div className="input-wrapper">
               <input 
                 type="password" 
                 className="form-input" 
-                placeholder="New password"
+                placeholder={t('New Password')}
                 value={newPassword} 
                 onChange={(e) => setNewPassword(e.target.value)} 
                 id="chg-new-pw" 
@@ -95,12 +95,12 @@ function ChangePasswordSection() {
             </div>
           </div>
           <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">Confirm Password</label>
+            <label className="form-label">{t('Confirm Password')}</label>
             <div className="input-wrapper">
               <input 
                 type="password" 
                 className="form-input" 
-                placeholder="Confirm password"
+                placeholder={t('Confirm Password')}
                 value={confirmPassword} 
                 onChange={(e) => setConfirmPassword(e.target.value)} 
                 id="chg-confirm-pw" 
@@ -111,7 +111,7 @@ function ChangePasswordSection() {
         </div>
         <div className="profile-form-footer">
           <button type="submit" className="btn-primary" style={{ width: 'auto', padding: '10px 24px' }} disabled={loading}>
-            {loading ? 'Updating...' : 'Update Password'}
+            {loading ? t('Updating...') : t('Update Password')}
           </button>
         </div>
       </form>
@@ -120,7 +120,7 @@ function ChangePasswordSection() {
 }
 
 export default function Profile() {
-  const { currentUser, updateProfile } = useApp();
+  const { currentUser, updateProfile, t } = useApp();
   const fileInputRef = useRef(null);
 
   const [isEditMode, setIsEditMode] = useState(false);
@@ -158,7 +158,7 @@ export default function Profile() {
     setSuccess('');
 
     if (!name.trim()) {
-      setError('Name field cannot be left blank.');
+      setError(t('Name field cannot be left blank.') || 'Name field cannot be left blank.');
       return;
     }
 
@@ -167,12 +167,12 @@ export default function Profile() {
     setLoading(false);
 
     if (res.success) {
-      setSuccess('Profile updated successfully!');
+      setSuccess(t('Profile updated successfully!') || 'Profile updated successfully!');
       setIsEditMode(false);
       setLicenceFile(null);
       setTimeout(() => setSuccess(''), 3000);
     } else {
-      setError(res.message || 'Failed to update profile.');
+      setError(res.message || t('Failed to update profile.'));
     }
   };
 
@@ -193,7 +193,7 @@ export default function Profile() {
         <div className="profile-banner-graphic">
           <div className="profile-banner-overlay" />
           <div className="profile-banner-meta">
-            LEXJURIS CHAMBERS — MEMBER ACCOUNT
+            {t('LEXJURIS CHAMBERS — MEMBER ACCOUNT')}
           </div>
         </div>
 
@@ -214,10 +214,10 @@ export default function Profile() {
               
               <div className="profile-status-badges">
                 <span className="status-badge-active">
-                  ✓ Active Member
+                  {t('✓ Active Member')}
                 </span>
                 <span className="status-badge-licence">
-                  ⚖️ Verified Account
+                  {t('⚖️ Verified Account')}
                 </span>
               </div>
             </div>
@@ -231,7 +231,7 @@ export default function Profile() {
                   onClick={() => setIsEditMode(true)}
                   style={{ width: 'auto', padding: '8px 18px', fontSize: '13px' }}
                 >
-                  ✏️ Edit Profile
+                  {t('✏️ Edit Profile')}
                 </button>
               ) : (
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -241,7 +241,7 @@ export default function Profile() {
                     onClick={handleCancel}
                     style={{ width: 'auto', padding: '8px 18px', fontSize: '13px' }}
                   >
-                    Cancel
+                    {t('Cancel')}
                   </button>
                   <button 
                     type="button" 
@@ -250,7 +250,7 @@ export default function Profile() {
                     disabled={loading}
                     style={{ width: 'auto', padding: '8px 18px', fontSize: '13px' }}
                   >
-                    {loading ? 'Saving...' : '💾 Save'}
+                    {loading ? t('Saving...') : t('💾 Save')}
                   </button>
                 </div>
               )}
@@ -277,15 +277,15 @@ export default function Profile() {
           <div className="profile-section-header" style={{ marginBottom: '8px' }}>
             <span style={{ fontSize: '20px' }}>📋</span>
             <div>
-              <h4 className="profile-section-title">Personal Details</h4>
-              <p className="profile-section-subtitle">Account information details</p>
+              <h4 className="profile-section-title">{t('Personal Details')}</h4>
+              <p className="profile-section-subtitle">{t('Account information details')}</p>
             </div>
           </div>
 
           <form onSubmit={handleSaveProfile} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {/* Full Name */}
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Full Name</label>
+              <label className="form-label">{t('Full Name')}</label>
               {isEditMode ? (
                 <div className="input-wrapper">
                   <input 
@@ -304,13 +304,13 @@ export default function Profile() {
 
             {/* Email (Always Read-only) */}
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Email Address</label>
+              <label className="form-label">{t('Email Address')}</label>
               <div className="profile-static-value text-muted-value">{currentUser.email || 'N/A'}</div>
             </div>
 
             {/* Phone Number */}
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Phone Number</label>
+              <label className="form-label">{t('Phone Number')}</label>
               {isEditMode ? (
                 <div className="input-wrapper">
                   <input 
@@ -322,14 +322,14 @@ export default function Profile() {
                   <span className="input-icon">📱</span>
                 </div>
               ) : (
-                <div className="profile-static-value">{currentUser.phone || 'Not Specified'}</div>
+                <div className="profile-static-value">{currentUser.phone || t('Not Specified')}</div>
               )}
             </div>
 
             {/* Account Role */}
             <div className="form-group" style={{ marginBottom: 0 }}>
-              <label className="form-label">Security Role</label>
-              <div className="profile-static-value text-muted-value">{currentUser.role}</div>
+              <label className="form-label">{t('Security Role')}</label>
+              <div className="profile-static-value text-muted-value">{t(currentUser.role) || currentUser.role}</div>
             </div>
           </form>
         </div>
@@ -339,8 +339,8 @@ export default function Profile() {
           <div className="profile-section-header">
             <span style={{ fontSize: '20px' }}>🪪</span>
             <div>
-              <h4 className="profile-section-title">Licence Verification</h4>
-              <p className="profile-section-subtitle">Registered Bar Council identification image</p>
+              <h4 className="profile-section-title">{t('Licence Verification')}</h4>
+              <p className="profile-section-subtitle">{t('Registered Bar Council identification image')}</p>
             </div>
           </div>
 
@@ -356,7 +356,7 @@ export default function Profile() {
             ) : (
               <div className="profile-licence-placeholder">
                 <span>🪪</span>
-                <p>No licence card uploaded</p>
+                <p>{t('No licence card uploaded')}</p>
               </div>
             )}
 
@@ -368,7 +368,7 @@ export default function Profile() {
                   onClick={() => fileInputRef.current.click()}
                   style={{ width: 'auto', padding: '8px 16px', fontSize: '13px' }}
                 >
-                  📷 Upload New Image
+                  {t('📷 Upload New Image')}
                 </button>
                 <input 
                   type="file" 

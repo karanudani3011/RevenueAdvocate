@@ -1,83 +1,250 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useApp } from '../context/AppContext';
 
-const TYPE_COLORS = {
-  Civil:      { bg: 'rgba(37,99,235,0.12)',   color: '#2563eb' },
-  Criminal:   { bg: 'rgba(239,68,68,0.12)',    color: '#ef4444' },
-  Commercial: { bg: 'rgba(139,92,246,0.12)',   color: '#8b5cf6' },
-  Property:   { bg: 'rgba(245,158,11,0.12)',   color: '#f59e0b' },
-  Family:     { bg: 'rgba(236,72,153,0.12)',   color: '#ec4899' },
-  Taxation:   { bg: 'rgba(16,185,129,0.12)',   color: '#10b981' },
-  Labor:      { bg: 'rgba(249,115,22,0.12)',   color: '#f97316' },
-};
-
-const STATUS_COLORS = {
-  active:  { bg: 'rgba(16,185,129,0.12)',  color: '#10b981' },
-  pending: { bg: 'rgba(245,158,11,0.12)',  color: '#f59e0b' },
-  closed:  { bg: 'rgba(148,163,184,0.12)', color: '#94a3b8' },
+const STATUS_STYLES = {
+  active:  { bg: 'rgba(22,163,74,0.10)',   color: '#16a34a' },
+  pending: { bg: 'rgba(217,119,6,0.10)',   color: '#d97706' },
+  closed:  { bg: 'rgba(148,163,184,0.12)', color: '#64748b' },
 };
 
 const formatDate = (d) =>
-  d ? new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
+  d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
 
-// Generates a stable pseudo-random date from a case id string
-const fallbackDate = (seed) => {
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const hash = [...seed].reduce((h, c) => (h * 31 + c.charCodeAt(0)) & 0xffff, 0);
-  const day   = (hash % 28) + 1;
-  const month = months[(hash >> 4) % 12];
-  const year  = 2024 + ((hash >> 8) % 3);
-  return `${String(day).padStart(2,'0')} ${month} ${year}`;
-};
+/* ─────────────────────────────────────────────
+   Signature Pad Modal (canvas-based)
+───────────────────────────────────────────── */
+function SignaturePadModal({ caseItem, onSave, onClose }) {
+  const canvasRef   = useRef(null);
+  const isDrawing   = useRef(false);
+  const lastPos     = useRef({ x: 0, y: 0 });
+  const [isEmpty, setIsEmpty] = useState(true);
 
-const getDate = (c) =>
-  c.date ? formatDate(c.date) : fallbackDate(c.id);
+  /* Load existing signature onto canvas on open */
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    if (caseItem.signature) {
+      const img = new Image();
+      img.onload = () => ctx.drawImage(img, 0, 0);
+      img.src = caseItem.signature;
+      setIsEmpty(false);
+    }
+  }, [caseItem.signature]);
+
+  /* Helper: get position relative to canvas */
+  const getPos = (e, canvas) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width  / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top)  * scaleY,
+    };
+  };
+
+  const startDraw = useCallback((e) => {
+    e.preventDefault();
+    isDrawing.current = true;
+    lastPos.current = getPos(e, canvasRef.current);
+  }, []);
+
+  const draw = useCallback((e) => {
+    e.preventDefault();
+    if (!isDrawing.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    const pos = getPos(e, canvas);
+
+    ctx.beginPath();
+    ctx.moveTo(lastPos.current.x, lastPos.current.y);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.strokeStyle = '#1e3a8a';
+    ctx.lineWidth   = 2.5;
+    ctx.lineCap     = 'round';
+    ctx.lineJoin    = 'round';
+    ctx.stroke();
+
+    lastPos.current = pos;
+    setIsEmpty(false);
+  }, []);
+
+  const stopDraw = useCallback((e) => {
+    e?.preventDefault();
+    isDrawing.current = false;
+  }, []);
+
+  const clearCanvas = () => {
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    setIsEmpty(true);
+  };
+
+  const handleSave = () => {
+    if (isEmpty) { alert('Please draw a signature first.'); return; }
+    const dataUrl = canvasRef.current.toDataURL('image/png');
+    onSave(caseItem.id, dataUrl);
+    onClose();
+  };
+
+  return (
+    <div className="modal-overlay animated-fade" style={{ zIndex: 300 }}>
+      <div className="modal-content glass-panel" style={{
+        background: 'var(--bg-secondary)',
+        maxWidth: '520px', width: '100%',
+        padding: '28px'
+      }}>
+        {/* Header */}
+        <div className="modal-header" style={{ marginBottom: '4px' }}>
+          <h3 className="modal-title">✍️ સહી (Virtual Signature)</h3>
+          <button className="modal-close" onClick={onClose}>×</button>
+        </div>
+
+        {/* Case info */}
+        <p style={{ fontSize: '12px', color: 'var(--text-muted)', marginBottom: '16px' }}>
+          <strong>{caseItem.petitioner}</strong> vs {caseItem.respondent}
+        </p>
+
+        {/* Canvas pad */}
+        <div style={{
+          border: '2px solid var(--border-color)',
+          borderRadius: 'var(--radius-md)',
+          background: '#ffffff',
+          overflow: 'hidden',
+          cursor: 'crosshair',
+          touchAction: 'none',
+          position: 'relative'
+        }}>
+          <canvas
+            ref={canvasRef}
+            width={460}
+            height={200}
+            style={{ display: 'block', width: '100%', height: '200px' }}
+            onMouseDown={startDraw}
+            onMouseMove={draw}
+            onMouseUp={stopDraw}
+            onMouseLeave={stopDraw}
+            onTouchStart={startDraw}
+            onTouchMove={draw}
+            onTouchEnd={stopDraw}
+            id="signature-canvas"
+          />
+          {/* Watermark guide line */}
+          <div style={{
+            position: 'absolute', bottom: '40px', left: '20px', right: '20px',
+            borderBottom: '1px dashed #cbd5e1', pointerEvents: 'none'
+          }} />
+          <div style={{
+            position: 'absolute', bottom: '20px', left: '20px',
+            fontSize: '11px', color: '#94a3b8', pointerEvents: 'none'
+          }}>
+            અહીં સહી કરો →
+          </div>
+        </div>
+
+        {/* Controls */}
+        <div style={{ display: 'flex', gap: '10px', marginTop: '16px' }}>
+          <button
+            type="button"
+            onClick={clearCanvas}
+            style={{
+              padding: '8px 18px', borderRadius: 'var(--radius-sm)',
+              border: '1px solid var(--border-color)', background: 'var(--bg-primary)',
+              color: 'var(--text-secondary)', cursor: 'pointer', fontSize: '13px',
+              fontWeight: '500', fontFamily: 'var(--font-family)'
+            }}
+            id="sig-clear-btn"
+          >
+            🗑 Clear
+          </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={onClose}
+            style={{ flex: 1 }}
+            id="sig-cancel-btn"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={handleSave}
+            style={{ flex: 1 }}
+            id="sig-save-btn"
+          >
+            ✅ Save Signature
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Main CasesList Component
+───────────────────────────────────────────── */
 export default function CasesList() {
-  const { cases, clients, addCase, updateCaseStatus, deleteCase, currentUser } = useApp();
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const { cases, addCase, updateCaseStatus, deleteCase, updateCaseSignature, currentUser, t } = useApp();
+  const [showAddForm,   setShowAddForm]   = useState(false);
+  const [sigCase,       setSigCase]       = useState(null); // case being signed
+  const [searchQuery,   setSearchQuery]   = useState('');
+  const [statusFilter,  setStatusFilter]  = useState('all');
 
   // Form state
-  const [caseNumber, setCaseNumber] = useState('');
-  const [title, setTitle]           = useState('');
-  const [clientId, setClientId]     = useState('');
-  const [court, setCourt]           = useState('');
-  const [type, setType]             = useState('Civil');
-  const [date, setDate]             = useState(new Date().toISOString().split('T')[0]);
+  const [filingDate,      setFilingDate]      = useState(new Date().toISOString().split('T')[0]);
+  const [respondent,      setRespondent]      = useState('');
+  const [petitioner,      setPetitioner]      = useState('');
+  const [propertyDetails, setPropertyDetails] = useState('');
+  const [village,         setVillage]         = useState('');
+  const [status,          setStatus]          = useState('active');
+  const [remarks,         setRemarks]         = useState('દાખલ');
 
   const isReadOnly = currentUser?.role === 'Accountant';
 
+  const resetForm = () => {
+    setFilingDate(new Date().toISOString().split('T')[0]);
+    setRespondent(''); setPetitioner('');
+    setPropertyDetails(''); setVillage('');
+    setStatus('active'); setRemarks('દાખલ');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!caseNumber || !title || !clientId || !type || !date) {
+    if (!filingDate || !respondent || !petitioner || !propertyDetails || !village) {
       alert('Please fill in all required fields');
       return;
     }
-    addCase(caseNumber, title, clientId, court, type, date);
+    addCase(filingDate, respondent, petitioner, propertyDetails, village, status, remarks);
     setShowAddForm(false);
-    setCaseNumber(''); setTitle(''); setClientId('');
-    setCourt(''); setType('Civil');
-    setDate(new Date().toISOString().split('T')[0]);
+    resetForm();
   };
 
   const filteredCases = cases.filter(c => {
     const q = searchQuery.toLowerCase();
     const matchesSearch =
-      c.caseNumber.toLowerCase().includes(q) ||
-      c.title.toLowerCase().includes(q) ||
-      c.clientName.toLowerCase().includes(q) ||
-      c.type.toLowerCase().includes(q);
+      c.respondent?.toLowerCase().includes(q) ||
+      c.petitioner?.toLowerCase().includes(q) ||
+      c.village?.toLowerCase().includes(q) ||
+      c.propertyDetails?.toLowerCase().includes(q) ||
+      c.remarks?.toLowerCase().includes(q);
     const matchesStatus = statusFilter === 'all' || c.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
   return (
     <div className="panel-card glass-panel animated-slideup" style={{ minHeight: '500px' }}>
-      {/* Header */}
+
+      {/* ── Header ─────────────────────────────── */}
       <div className="panel-header">
-        <h3 className="panel-title">📁 Lawsuits &amp; Case Portfolios</h3>
+        <h3 className="panel-title">📁 {t('Lawsuits & Case Portfolios')}</h3>
         {!isReadOnly && (
           <button
             className="btn-primary"
@@ -85,23 +252,24 @@ export default function CasesList() {
             onClick={() => setShowAddForm(true)}
             id="add-case-btn"
           >
-            + Register New Case
+            {t('+ Register New Case')}
           </button>
         )}
       </div>
 
+      {/* Read-only notice */}
       {isReadOnly && (
         <div style={{ padding: '8px 12px', background: 'var(--warning-bg)', color: 'var(--warning)', borderRadius: '6px', fontSize: '12px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span>⚠️</span> <strong>Read-Only Access:</strong> Case registrations and status changes are managed by Advocates.
+          <span>⚠️</span> <strong>{t('Read-Only Access:')}</strong> {t('Case registrations and status changes are managed by Advocates.')}
         </div>
       )}
 
-      {/* Filters */}
+      {/* ── Filters ────────────────────────────── */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
         <input
           type="text"
           className="form-input"
-          placeholder="Search by case ID, title, type or client..."
+          placeholder={t('Search by case ID, title, type or client...')}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{ flex: '1', minWidth: '220px', paddingLeft: '16px' }}
@@ -115,125 +283,164 @@ export default function CasesList() {
           id="filter-cases-status"
         >
           <option value="all">All Cases</option>
-          <option value="active">Active</option>
-          <option value="pending">Pending</option>
-          <option value="closed">Closed</option>
+          <option value="active">{t('Active')}</option>
+          <option value="pending">{t('Pending')}</option>
+          <option value="closed">{t('Closed')}</option>
         </select>
       </div>
 
-      {/* Table */}
+      {/* ── Table ──────────────────────────────── */}
       <div className="table-container">
         {filteredCases.length === 0 ? (
           <div style={{ padding: '40px', textAlign: 'center', color: 'var(--text-muted)' }}>
-            No matching case records found.
+            {t('No matching case records found.')}
           </div>
         ) : (
           <table className="data-table">
             <thead>
               <tr>
-                <th>Case ID</th>
-                <th>Case Date</th>
-                <th>Case Title</th>
-                <th>Type</th>
-                <th>Client Name</th>
-                <th>Filing Date</th>
-                <th>Status</th>
-                {!isReadOnly && <th>Actions</th>}
+                <th style={{ width: '55px', textAlign: 'center' }}>{t('S.No.')}</th>
+                <th style={{ whiteSpace: 'nowrap' }}>{t('Filing Date')}</th>
+                <th>{t('Respondent')}</th>
+                <th>{t('Petitioner')}</th>
+                <th>{t('Property Details')}</th>
+                <th style={{ whiteSpace: 'nowrap' }}>{t('Village')}</th>
+                <th style={{ width: '90px',  textAlign: 'center' }}>{t('Remarks')}</th>
+                <th style={{ width: '90px',  textAlign: 'center' }}>સહી</th>
+                <th style={{ width: '80px',  textAlign: 'center' }}>{t('Actions')}</th>
               </tr>
             </thead>
             <tbody>
               {filteredCases.map((c, index) => {
-                const typeStyle   = TYPE_COLORS[c.type]    || { bg: 'var(--primary-glow)', color: 'var(--primary)' };
-                const statusStyle = STATUS_COLORS[c.status] || { bg: 'var(--primary-glow)', color: 'var(--primary)' };
+                const ss = STATUS_STYLES[c.status] || STATUS_STYLES.active;
                 return (
                   <tr key={c.id}>
 
-                    {/* Case ID — sequential number */}
-                    <td>
-                      <div style={{ fontWeight: '800', fontSize: '15px', color: 'var(--primary)' }}>
-                        {index + 1}
-                      </div>
+                    {/* ક્રમ */}
+                    <td style={{ textAlign: 'center', fontWeight: '700', fontSize: '15px', color: 'var(--primary)' }}>
+                      {index + 1}
                     </td>
 
-                    {/* Case Date */}
-                    <td style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-                      {getDate(c)}
+                    {/* દાખલ તારીખ */}
+                    <td style={{ fontSize: '13px', whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
+                      {formatDate(c.filingDate)}
                     </td>
 
-                    {/* Case Title */}
-                    <td style={{ fontWeight: '500', maxWidth: '220px' }}>
-                      <span style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {c.title}
-                      </span>
+                    {/* દેનાર */}
+                    <td style={{ fontWeight: '600', color: 'var(--text-primary)' }}>
+                      {c.respondent}
                     </td>
 
-                    {/* Type */}
+                    {/* ધરાવનાર */}
+                    <td style={{ fontWeight: '700', color: 'var(--primary)' }}>
+                      {c.petitioner}
+                    </td>
+
+                    {/* મિલકતની વિગત */}
+                    <td style={{ fontSize: '13px', maxWidth: '240px', whiteSpace: 'normal', wordBreak: 'break-word', color: 'var(--text-secondary)' }}>
+                      {c.propertyDetails}
+                    </td>
+
+                    {/* ગામ */}
                     <td>
                       <span style={{
-                        display: 'inline-block',
-                        padding: '3px 10px',
-                        borderRadius: '20px',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        background: typeStyle.bg,
-                        color: typeStyle.color,
+                        display: 'inline-block', padding: '3px 10px',
+                        borderRadius: '20px', fontSize: '12px', fontWeight: '600',
+                        background: 'var(--primary-glow)', color: 'var(--primary)',
                         whiteSpace: 'nowrap'
                       }}>
-                        {c.type}
+                        {c.village}
                       </span>
                     </td>
 
-                    {/* Client Name */}
-                    <td style={{ fontWeight: '500' }}>{c.clientName}</td>
-
-                    {/* Filing Date */}
-                    <td style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-                      {getDate(c)}
-                    </td>
-
-                    {/* Status */}
-                    <td>
+                    {/* શેરો */}
+                    <td style={{ textAlign: 'center' }}>
                       {isReadOnly ? (
                         <span style={{
-                          display: 'inline-block',
-                          padding: '3px 10px',
-                          borderRadius: '20px',
-                          fontSize: '12px',
-                          fontWeight: '600',
-                          background: statusStyle.bg,
-                          color: statusStyle.color,
-                          textTransform: 'capitalize'
+                          display: 'inline-block', padding: '3px 12px',
+                          borderRadius: '20px', fontSize: '12px', fontWeight: '700',
+                          background: ss.bg, color: ss.color
                         }}>
-                          {c.status}
+                          {c.remarks}
                         </span>
                       ) : (
                         <select
                           value={c.status}
                           onChange={(e) => updateCaseStatus(c.id, e.target.value)}
                           style={{
-                            background: statusStyle.bg,
-                            border: `1px solid ${statusStyle.color}50`,
-                            color: statusStyle.color,
-                            borderRadius: '20px',
-                            padding: '3px 10px',
-                            fontSize: '12px',
-                            fontWeight: '600',
-                            cursor: 'pointer',
-                            outline: 'none'
+                            background: ss.bg, border: `1px solid ${ss.color}50`,
+                            color: ss.color, borderRadius: '20px',
+                            padding: '3px 10px', fontSize: '12px', fontWeight: '700',
+                            cursor: 'pointer', outline: 'none'
                           }}
                           id={`status-select-${c.id}`}
                         >
-                          <option value="active">Active</option>
-                          <option value="pending">Pending</option>
-                          <option value="closed">Closed</option>
+                          <option value="active">દાખલ</option>
+                          <option value="pending">બાકી</option>
+                          <option value="closed">બંધ</option>
                         </select>
                       )}
                     </td>
 
+                    {/* સહી — Signature column */}
+                    <td style={{ textAlign: 'center' }}>
+                      {c.signature ? (
+                        /* Show thumbnail + re-sign button */
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                          <img
+                            src={c.signature}
+                            alt="signature"
+                            style={{
+                              width: '72px', height: '36px',
+                              objectFit: 'contain',
+                              border: '1px solid var(--border-color)',
+                              borderRadius: '6px',
+                              background: '#fff',
+                              cursor: isReadOnly ? 'default' : 'pointer'
+                            }}
+                            onClick={() => !isReadOnly && setSigCase(c)}
+                            title="Click to re-sign"
+                          />
+                          {!isReadOnly && (
+                            <span
+                              style={{ fontSize: '10px', color: 'var(--primary)', cursor: 'pointer' }}
+                              onClick={() => setSigCase(c)}
+                            >
+                              ✏️ Edit
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        !isReadOnly ? (
+                          <button
+                            onClick={() => setSigCase(c)}
+                            style={{
+                              padding: '5px 10px',
+                              background: 'var(--primary-glow)',
+                              border: '1px dashed var(--primary)',
+                              borderRadius: 'var(--radius-sm)',
+                              color: 'var(--primary)',
+                              fontSize: '12px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              whiteSpace: 'nowrap',
+                              fontFamily: 'var(--font-family)'
+                            }}
+                            id={`sign-btn-${c.id}`}
+                            title="Add virtual signature"
+                          >
+                            ✍️ સહી
+                          </button>
+                        ) : (
+                          <span style={{ color: 'var(--text-muted)', fontSize: '12px' }}>—</span>
+                        )
+                      )}
+                    </td>
+
                     {/* Actions */}
-                    {!isReadOnly && (
-                      <td>
-                        <div className="action-buttons">
+                    <td style={{ textAlign: 'center' }}>
+                      {!isReadOnly && (
+                        <div className="action-buttons" style={{ justifyContent: 'center' }}>
                           <button
                             className="btn-icon delete"
                             onClick={() => deleteCase(c.id)}
@@ -243,8 +450,8 @@ export default function CasesList() {
                             🗑️
                           </button>
                         </div>
-                      </td>
-                    )}
+                      )}
+                    </td>
                   </tr>
                 );
               })}
@@ -253,89 +460,116 @@ export default function CasesList() {
         )}
       </div>
 
-      {/* Add Case Modal */}
+      {/* ── Signature Pad Modal ─────────────────── */}
+      {sigCase && (
+        <SignaturePadModal
+          caseItem={sigCase}
+          onSave={updateCaseSignature}
+          onClose={() => setSigCase(null)}
+        />
+      )}
+
+      {/* ── Add Case Modal ──────────────────────── */}
       {showAddForm && (
         <div className="modal-overlay animated-fade">
-          <div className="modal-content glass-panel" style={{ background: 'var(--bg-secondary)', maxWidth: '560px', width: '100%' }}>
+          <div className="modal-content glass-panel" style={{ background: 'var(--bg-secondary)', maxWidth: '600px', width: '100%' }}>
             <div className="modal-header">
-              <h3 className="modal-title">📁 Register New Case</h3>
-              <button className="modal-close" onClick={() => setShowAddForm(false)}>×</button>
+              <h3 className="modal-title">📁 {t('Register New Case')}</h3>
+              <button className="modal-close" onClick={() => { setShowAddForm(false); resetForm(); }}>×</button>
             </div>
             <form onSubmit={handleSubmit}>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label">Case ID / CNR Number *</label>
+                  <label className="form-label">{t('Filing Date *')}</label>
                   <div className="input-wrapper">
-                    <input type="text" className="form-input" placeholder="e.g. SC/2026/1024"
-                      value={caseNumber} onChange={(e) => setCaseNumber(e.target.value)} id="new-case-number" />
-                    <span className="input-icon">🆔</span>
+                    <input type="date" className="form-input"
+                      value={filingDate} onChange={(e) => setFilingDate(e.target.value)}
+                      id="new-case-date" required style={{ paddingLeft: '16px' }} />
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Case Date / Filing Date *</label>
+                  <label className="form-label">{t('Village *')}</label>
                   <div className="input-wrapper">
-                    <input type="date" className="form-input" value={date}
-                      onChange={(e) => setDate(e.target.value)} id="new-case-date"
-                      style={{ paddingLeft: '16px' }} />
+                    <input type="text" className="form-input"
+                      placeholder="e.g. નાણી(મોટી)"
+                      value={village} onChange={(e) => setVillage(e.target.value)}
+                      id="new-case-village" required />
+                    <span className="input-icon">🏘️</span>
                   </div>
                 </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label">Case Title *</label>
+                <label className="form-label">{t('Respondent (Denar) *')}</label>
                 <div className="input-wrapper">
-                  <input type="text" className="form-input" placeholder="e.g. Mehta vs. Tech Solutions"
-                    value={title} onChange={(e) => setTitle(e.target.value)} id="new-case-title" />
-                  <span className="input-icon">💼</span>
+                  <input type="text" className="form-input"
+                    placeholder="e.g. અમરાભાઈ ભીમાભાઈ કોલી"
+                    value={respondent} onChange={(e) => setRespondent(e.target.value)}
+                    id="new-case-respondent" required />
+                  <span className="input-icon">👤</span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{t('Petitioner (Dharavnar) *')}</label>
+                <div className="input-wrapper">
+                  <input type="text" className="form-input"
+                    placeholder="e.g. જીવરાજભાઈ નારણભાઈ રબારી"
+                    value={petitioner} onChange={(e) => setPetitioner(e.target.value)}
+                    id="new-case-petitioner" required />
+                  <span className="input-icon">👤</span>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{t('Property Details *')}</label>
+                <div className="input-wrapper">
+                  <textarea className="form-input"
+                    placeholder="e.g. ગામના રે.સર્વે નંબર ૬૬૭, ક્ષેત્રફળ ૨.૧૧.૦૫ હે."
+                    value={propertyDetails} onChange={(e) => setPropertyDetails(e.target.value)}
+                    style={{ minHeight: '64px', resize: 'vertical', paddingLeft: '44px', paddingTop: '10px' }}
+                    id="new-case-property" required />
+                  <span className="input-icon" style={{ top: '14px' }}>📝</span>
                 </div>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="form-group">
-                  <label className="form-label">Assigned Client *</label>
+                  <label className="form-label">{t('Status')}</label>
                   <div className="input-wrapper">
-                    <select className="form-input" value={clientId}
-                      onChange={(e) => setClientId(e.target.value)} style={{ paddingLeft: '16px' }} id="new-case-client">
-                      <option value="">-- Select Client --</option>
-                      {clients.map(cl => (
-                        <option key={cl.id} value={cl.id}>{cl.name}</option>
-                      ))}
+                    <select className="form-input" value={status}
+                      onChange={(e) => {
+                        setStatus(e.target.value);
+                        setRemarks(e.target.value === 'closed' ? 'બંધ' : e.target.value === 'pending' ? 'બાકી' : 'દાખલ');
+                      }}
+                      style={{ paddingLeft: '16px' }} id="new-case-status">
+                      <option value="active">દાખલ (Active)</option>
+                      <option value="pending">બાકી (Pending)</option>
+                      <option value="closed">બંધ (Closed)</option>
                     </select>
                   </div>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Case Type *</label>
+                  <label className="form-label">{t('Remarks')}</label>
                   <div className="input-wrapper">
-                    <select className="form-input" value={type}
-                      onChange={(e) => setType(e.target.value)} style={{ paddingLeft: '16px' }} id="new-case-type">
-                      <option value="Civil">Civil Lawsuit</option>
-                      <option value="Criminal">Criminal Brief</option>
-                      <option value="Commercial">Commercial Dispute</option>
-                      <option value="Property">Property Settlement</option>
-                      <option value="Family">Family / Divorce Appeal</option>
-                      <option value="Taxation">Taxation Tribunal</option>
-                      <option value="Labor">Labour Dispute</option>
-                    </select>
+                    <input type="text" className="form-input"
+                      placeholder="e.g. દાખલ"
+                      value={remarks} onChange={(e) => setRemarks(e.target.value)}
+                      id="new-case-remarks" />
+                    <span className="input-icon">📋</span>
                   </div>
                 </div>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Presiding Court / Jurisdiction</label>
-                <div className="input-wrapper">
-                  <input type="text" className="form-input" placeholder="e.g. Delhi High Court"
-                    value={court} onChange={(e) => setCourt(e.target.value)} id="new-case-court" />
-                  <span className="input-icon">🏛️</span>
-                </div>
-              </div>
-
               <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
-                <button type="button" className="btn-secondary" onClick={() => setShowAddForm(false)} style={{ flex: 1 }}>
-                  Cancel
+                <button type="button" className="btn-secondary"
+                  onClick={() => { setShowAddForm(false); resetForm(); }}
+                  style={{ flex: 1 }}>
+                  {t('Cancel')}
                 </button>
                 <button type="submit" className="btn-primary" style={{ flex: 1 }} id="save-case-submit">
-                  Save Case
+                  {t('Save Case')}
                 </button>
               </div>
             </form>

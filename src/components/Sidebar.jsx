@@ -2,7 +2,7 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 
 export default function Sidebar({ currentTab, setCurrentTab }) {
-  const { currentUser, logout } = useApp();
+  const { currentUser, logout, t } = useApp();
 
   if (!currentUser) return null;
 
@@ -19,11 +19,11 @@ export default function Sidebar({ currentTab, setCurrentTab }) {
   };
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard',   icon: '📊' },
-    { id: 'clients',   label: 'Clients',      icon: '👥' },
-    { id: 'cases',     label: 'Cases & Files', icon: '📁' },
-    { id: 'finance',   label: 'Financials',   icon: '💰' },
-    { id: 'profile',   label: 'My Profile',   icon: '👤' },
+    { id: 'dashboard', label: t('Dashboard'),   icon: '📊' },
+    { id: 'clients',   label: t('Clients'),      icon: '👥' },
+    { id: 'cases',     label: t('Cases & Files'), icon: '📁' },
+    { id: 'finance',   label: t('Financials'),   icon: '💰' },
+    { id: 'profile',   label: t('My Profile'),   icon: '👤' },
   ];
 
   return (
@@ -32,7 +32,7 @@ export default function Sidebar({ currentTab, setCurrentTab }) {
         <div className="sidebar-logo">⚖️</div>
         <div className="sidebar-title">
           <span style={{ fontWeight: '700', color: 'var(--primary)' }}>LEXJURIS</span>
-          <span style={{ fontWeight: '400', fontSize: '14px', display: 'block', color: 'var(--text-muted)' }}>Advocate Panel</span>
+          <span style={{ fontWeight: '400', fontSize: '14px', display: 'block', color: 'var(--text-muted)' }}>{t('Advocate Panel')}</span>
         </div>
       </div>
 
@@ -68,7 +68,7 @@ export default function Sidebar({ currentTab, setCurrentTab }) {
           id="logout-btn"
         >
           <span style={{ fontSize: '18px' }}>🚪</span>
-          <span>Sign Out</span>
+          <span>{t('Sign Out')}</span>
         </div>
       </div>
     </aside>

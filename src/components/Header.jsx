@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 
 export default function Header({ currentTab }) {
-  const { currentUser, theme, toggleTheme, activities } = useApp();
+  const { currentUser, theme, toggleTheme, activities, language, setLanguage, t } = useApp();
   const [showNotifications, setShowNotifications] = useState(false);
 
   const getTitle = () => {
     switch (currentTab) {
-      case 'dashboard': return 'Chambers Dashboard';
-      case 'clients':   return 'Client Directory';
-      case 'cases':     return 'Case Portfolios';
-      case 'finance':   return 'Financial Ledgers';
-      case 'profile':   return 'My Profile';
-      default:          return 'Advocate Panel';
+      case 'dashboard': return t('Chambers Dashboard');
+      case 'clients':   return t('Client Directory');
+      case 'cases':     return t('Case Portfolios');
+      case 'finance':   return t('Financial Ledgers');
+      case 'profile':   return t('My Profile');
+      default:          return t('Advocate Panel');
     }
   };
 
@@ -26,26 +26,42 @@ export default function Header({ currentTab }) {
           {getTitle()}
         </h2>
         <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-          Welcome back, {currentUser?.name}
+          {t('Welcome back, ')}{currentUser?.name}
         </p>
       </div>
 
       <div className="header-actions">
         {/* Search */}
         <div className="header-search">
-          <input type="text" placeholder="Global Search cases, clients..." />
+          <input type="text" placeholder={t('Global Search cases, clients...')} />
           <span style={{ position: 'absolute', left: '14px', color: 'var(--text-muted)' }}>🔍</span>
         </div>
 
-        {/* Theme Toggle */}
-        <button 
-          className="theme-toggle" 
-          onClick={toggleTheme}
-          title="Toggle Dark/Light Mode"
-          id="theme-toggler"
-        >
-          <span style={{ fontSize: '18px' }}>{theme === 'dark' ? '☀️' : '🌙'}</span>
-        </button>
+        {/* Language dropdown */}
+        <div className="language-selector" style={{ position: 'relative' }}>
+          <select 
+            value={language} 
+            onChange={(e) => setLanguage(e.target.value)}
+            style={{
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+              padding: '6px 12px',
+              borderRadius: 'var(--radius-sm)',
+              fontSize: '13px',
+              cursor: 'pointer',
+              outline: 'none',
+              height: '36px',
+              fontWeight: '500'
+            }}
+            id="language-select"
+          >
+            <option value="en">🇺🇸 English</option>
+            <option value="gu">🇮🇳 ગુજરાતી</option>
+          </select>
+        </div>
+
+
 
         {/* Notification Bell */}
         <div style={{ position: 'relative' }}>
@@ -83,12 +99,12 @@ export default function Header({ currentTab }) {
               borderRadius: 'var(--radius-md)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px solid var(--border-color)' }}>
-                <span style={{ fontWeight: '600', fontSize: '13px' }}>Chambers Alerts</span>
-                <span style={{ color: 'var(--primary)', fontSize: '11px', cursor: 'pointer' }} onClick={() => setShowNotifications(false)}>Close</span>
+                <span style={{ fontWeight: '600', fontSize: '13px' }}>{t('Chambers Alerts')}</span>
+                <span style={{ color: 'var(--primary)', fontSize: '11px', cursor: 'pointer' }} onClick={() => setShowNotifications(false)}>{t('Close')}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {notificationItems.length === 0 ? (
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>No new notifications</p>
+                  <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center' }}>{t('No new notifications')}</p>
                 ) : (
                   notificationItems.map(act => (
                     <div key={act.id} style={{ fontSize: '12px', borderBottom: '1px solid rgba(0,0,0,0.02)', paddingBottom: '6px' }}>
