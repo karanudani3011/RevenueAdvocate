@@ -16,12 +16,12 @@ const getTodayDateString = (offsetDays = 0) => {
 };
 
 const initialClients = [
-  { id: 'c1', regDate: '2026-01-04', number: '246', caseType: 'ડી.એ. દાખલ', name: 'લાલુ આસુરામ હરીજન', caseDetails: '૧૨૨ના હુકમ સામે અપીલ', fee: '25000' },
-  { id: 'c2', regDate: '2026-01-07', number: '1739', caseType: 'ઈ.પી.એમ.સી.', name: 'દીપરાજ', caseDetails: 'ખાતા નંબર 419, ક્ષેત્રફળ ૧૮-૨ ઈ.પી. ૨૦૨૪', fee: '50000' },
-  { id: 'c3', regDate: '2026-01-09', number: '4619', caseType: 'વકીલાત', name: 'નરેશ', caseDetails: 'ખાતા નંબર ૨૩૨, હે.૧૦.૧૪.૪૬, પ્ર.એચ.૨-૨૪-૯૩', fee: '35000' },
-  { id: 'c4', regDate: '2026-01-09', number: '3392', caseType: 'હક્કપત્રક', name: 'માવજી', caseDetails: 'ખાતા નંબર ૧૬૬, રે.સર્વે. ૨૧૨, ૧૨૩, ક્ષેત્રફળ ૨૯.૨૬.૦૭', fee: '15000' },
-  { id: 'c5', regDate: '2026-01-12', number: '1427', caseType: 'ટી.એસ. દાખલ', name: 'મુકેશ', caseDetails: 'ખાતા નંબર ૧૨૫, રે.સર્વે. ૧૫૮, ૧૬૧', fee: '45000' },
-  { id: 'c6', regDate: '2026-01-20', number: '1517', caseType: 'હક્કપત્રક', name: 'હરિલાલ', caseDetails: 'ખાતા નંબર ૩૪૫, રે.સર્વે. ૬૬, ૭૫', fee: '30000' }
+  { id: 'c1', regDate: '2026-01-04', number: '246', caseType: 'ડી.એ. દાખલ', name: 'લાલુ આસુરામ હરીજન', caseDetails: '૧૨૨ના હુકમ સામે અપીલ', fee: '25000', paymentStatus: 'received', phone1: '9876543210', phone2: '' },
+  { id: 'c2', regDate: '2026-01-07', number: '1739', caseType: 'ઈ.પી.એમ.સી.', name: 'દીપરાજ', caseDetails: 'ખાતા નંબર 419, ક્ષેત્રફળ ૧૮-૨ ઈ.પી. ૨૦૨૪', fee: '50000', paymentStatus: 'pending', phone1: '9876543211', phone2: '9876543212' },
+  { id: 'c3', regDate: '2026-01-09', number: '4619', caseType: 'વકીલાત', name: 'નરેશ', caseDetails: 'ખાતા નંબર ૨૩૨, હે.૧૦.૧૪.૪૬, પ્ર.એચ.૨-૨૪-૯૩', fee: '35000', paymentStatus: 'received', phone1: '9876543213', phone2: '' },
+  { id: 'c4', regDate: '2026-01-09', number: '3392', caseType: 'હક્કપત્રક', name: 'માવજી', caseDetails: 'ખાતા નંબર ૧૬૬, રે.સર્વે. ૨૧૨, ૧૨૩, ક્ષેત્રફળ ૨૯.૨૬.૦૭', fee: '15000', paymentStatus: 'pending', phone1: '9876543214', phone2: '' },
+  { id: 'c5', regDate: '2026-01-12', number: '1427', caseType: 'ટી.એસ. દાખલ', name: 'મુકેશ', caseDetails: 'ખાતા નંબર ૧૨૫, રે.સર્વે. ૧૫૮, ૧૬૧', fee: '45000', paymentStatus: 'received', phone1: '9876543215', phone2: '9876543216' },
+  { id: 'c6', regDate: '2026-01-20', number: '1517', caseType: 'હક્કપત્રક', name: 'હરિલાલ', caseDetails: 'ખાતા નંબર ૩૪૫, રે.સર્વે. ૬૬, ૭૫', fee: '30000', paymentStatus: 'pending', phone1: '9876543217', phone2: '' }
 ];
 
 const initialCases = [
@@ -540,7 +540,7 @@ export const AppProvider = ({ children }) => {
   };
 
   // CRUD Operations
-  const addClient = (regDate, number, caseType, name, caseDetails, fee) => {
+  const addClient = (regDate, number, caseType, name, caseDetails, fee, paymentStatus, phone1, phone2) => {
     const newClient = {
       id: 'c_' + Date.now(),
       regDate,
@@ -548,7 +548,10 @@ export const AppProvider = ({ children }) => {
       caseType,
       name,
       caseDetails,
-      fee
+      fee,
+      paymentStatus: paymentStatus || 'pending',
+      phone1: phone1 || '',
+      phone2: phone2 || ''
     };
     setClients(prev => [...prev, newClient]);
     addActivity(`New case register entry: ${name} (${number})`, 'client');

@@ -16,6 +16,9 @@ export default function ClientsList() {
   const [name, setName] = useState('');
   const [caseDetails, setCaseDetails] = useState('');
   const [fee, setFee] = useState('');
+  const [paymentStatus, setPaymentStatus] = useState('pending');
+  const [phone1, setPhone1] = useState('');
+  const [phone2, setPhone2] = useState('');
 
   const handleEditClick = (client) => {
     setEditingId(client.id);
@@ -25,6 +28,9 @@ export default function ClientsList() {
     setName(client.name || '');
     setCaseDetails(client.caseDetails || '');
     setFee(client.fee || '');
+    setPaymentStatus(client.paymentStatus || 'pending');
+    setPhone1(client.phone1 || '');
+    setPhone2(client.phone2 || '');
     setShowAddForm(true);
   };
 
@@ -35,15 +41,18 @@ export default function ClientsList() {
     setName('');
     setCaseDetails('');
     setFee('');
+    setPaymentStatus('pending');
+    setPhone1('');
+    setPhone2('');
     setEditingId(null);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (editingId) {
-      updateClient(editingId, { regDate, number, caseType, name, caseDetails, fee });
+      updateClient(editingId, { regDate, number, caseType, name, caseDetails, fee, paymentStatus, phone1, phone2 });
     } else {
-      addClient(regDate, number, caseType, name, caseDetails, fee);
+      addClient(regDate, number, caseType, name, caseDetails, fee, paymentStatus, phone1, phone2);
     }
     setShowAddForm(false);
     resetForm();
@@ -53,7 +62,9 @@ export default function ClientsList() {
     c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.number?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.caseType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.caseDetails?.toLowerCase().includes(searchQuery.toLowerCase())
+    c.caseDetails?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.phone1?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.phone2?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const formatCurrency = (val) => {
@@ -71,7 +82,10 @@ export default function ClientsList() {
       ['Case Type', client.caseType || ''],
       ['Client Name', client.name || ''],
       ['Case Details', client.caseDetails || ''],
-      ['Fee', formatCurrency(client.fee)]
+      ['Phone 1', client.phone1 || ''],
+      ['Phone 2', client.phone2 || ''],
+      ['Fee', formatCurrency(client.fee)],
+      ['Payment Status', client.paymentStatus === 'received' ? 'Received' : 'Pending']
     ];
 
     doc.autoTable({
@@ -93,13 +107,16 @@ export default function ClientsList() {
       c.number,
       c.caseType,
       c.name,
+      c.phone1,
+      c.phone2,
       c.caseDetails,
-      formatCurrency(c.fee)
+      formatCurrency(c.fee),
+      c.paymentStatus === 'received' ? 'Received' : 'Pending'
     ]);
 
     doc.autoTable({
       startY: 30,
-      head: [['S.No.', 'Reg Date', 'Number', 'Type', 'Name', 'Details', 'Fee']],
+      head: [['S.No.', 'Reg Date', 'Number', 'Type', 'Name', 'Phone 1', 'Phone 2', 'Details', 'Fee', 'Status']],
       body: tableData,
     });
 
@@ -157,8 +174,11 @@ export default function ClientsList() {
                 <th>{t('Register Number')}</th>
                 <th>{t('Case Type')}</th>
                 <th>{t('Client Name')}</th>
+                <th>{t('Phone 1')}</th>
+                <th>{t('Phone 2')}</th>
                 <th>{t('Case Details')}</th>
                 <th>{t('Fee')}</th>
+                <th>{t('Status')}</th>
                 <th style={{ width: '120px', textAlign: 'center' }}>{t('Actions')}</th>
               </tr>
             </thead>
@@ -170,8 +190,15 @@ export default function ClientsList() {
                   <td style={{ fontWeight: '600' }}>{c.number}</td>
                   <td><span className="badge pending" style={{ fontSize: '12px' }}>{c.caseType}</span></td>
                   <td style={{ fontWeight: '700', color: 'var(--primary)' }}>{c.name}</td>
+                  <td style={{ fontSize: '13px' }}>{c.phone1}</td>
+                  <td style={{ fontSize: '13px' }}>{c.phone2}</td>
                   <td style={{ fontSize: '13px', maxWidth: '240px', whiteSpace: 'normal', wordBreak: 'break-word' }}>{c.caseDetails}</td>
                   <td style={{ fontWeight: '700', color: 'var(--success)' }}>{formatCurrency(c.fee)}</td>
+                  <td>
+                    <span className={`badge ${c.paymentStatus === 'received' ? 'success' : 'pending'}`} style={{ fontSize: '12px' }}>
+                      {c.paymentStatus === 'received' ? 'Received' : 'Pending'}
+                    </span>
+                  </td>
                   <td style={{ textAlign: 'center' }}>
                     <div className="action-buttons" style={{ justifyContent: 'center', gap: '8px' }}>
                       <button 
@@ -277,6 +304,36 @@ export default function ClientsList() {
                     <span className="input-icon">👤</span>
                   </div>
                 </div>
+
+                <div className="form-group">
+                  <label className="form-label">{t('Phone Number 1')}</label>
+                  <div className="input-wrapper">
+                    <input
+                      type="tel"
+                      className="form-input"
+                      placeholder="e.g. 9876543210"
+                      value={phone1}
+                      onChange={(e) => setPhone1(e.target.value)}
+                      id="new-client-phone1"
+                    />
+                    <span className="input-icon">📞</span>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">{t('Phone Number 2')}</label>
+                  <div className="input-wrapper">
+                    <input
+                      type="tel"
+                      className="form-input"
+                      placeholder="e.g. 9876543211"
+                      value={phone2}
+                      onChange={(e) => setPhone2(e.target.value)}
+                      id="new-client-phone2"
+                    />
+                    <span className="input-icon">📞</span>
+                  </div>
+                </div>
               </div>
 
               <div className="form-group" style={{ marginTop: '8px' }}>
@@ -295,7 +352,7 @@ export default function ClientsList() {
                 </div>
               </div>
 
-              <div className="responsive-form-grid" style={{ gridTemplateColumns: '1fr' }}>
+              <div className="responsive-form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <div className="form-group">
                   <label className="form-label">{t('Fee')}</label>
                   <div className="input-wrapper">
@@ -309,6 +366,21 @@ export default function ClientsList() {
                       
                     />
                     <span className="input-icon">₹</span>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">{t('Payment Status')}</label>
+                  <div className="input-wrapper">
+                    <select
+                      className="form-input"
+                      value={paymentStatus}
+                      onChange={(e) => setPaymentStatus(e.target.value)}
+                      id="new-client-payment-status"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="received">Received</option>
+                    </select>
                   </div>
                 </div>
               </div>

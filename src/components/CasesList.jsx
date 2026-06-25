@@ -328,7 +328,7 @@ export default function CasesList() {
             </div>
             <form onSubmit={handleSubmit}>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="responsive-form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <div className="form-group">
                   <label className="form-label">{t('Filing Date')}</label>
                   <div className="input-wrapper">
@@ -395,7 +395,7 @@ export default function CasesList() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div className="responsive-form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
                 <div className="form-group">
                   <label className="form-label">{t('Status')}</label>
                   <div className="input-wrapper">
