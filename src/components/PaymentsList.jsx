@@ -34,10 +34,6 @@ export default function PaymentsList() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!clientName || !amount || !category || !date) {
-      alert(t('Please fill in all fields') || 'Please fill in all fields');
-      return;
-    }
     addPayment(clientName, amount, type, category, date, status);
     setShowAddForm(false);
     // Reset Form

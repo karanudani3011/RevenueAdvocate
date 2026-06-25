@@ -12,8 +12,8 @@ const STATUS_STYLES = {
 const formatDate = (d) =>
   d ? new Date(d).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
 
-export default function CasesList() {
-  const { cases, addCase, updateCase, updateCaseStatus, deleteCase, currentUser, t } = useApp();
+export default function MamlatdarList() {
+  const { mamlatdars, addMamlatdar, updateMamlatdar, updateMamlatdarStatus, deleteMamlatdar, currentUser, t } = useApp();
   const [showAddForm,   setShowAddForm]   = useState(false);
   const [editingId,     setEditingId]     = useState(null);
   const [searchQuery,   setSearchQuery]   = useState('');
@@ -56,15 +56,15 @@ export default function CasesList() {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (editingId) {
-      updateCase(editingId, { filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail });
+      updateMamlatdar(editingId, { filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail });
     } else {
-      addCase(filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail);
+      addMamlatdar(filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail);
     }
     setShowAddForm(false);
     resetForm();
   };
 
-  const filteredCases = cases.filter(c => {
+  const filteredCases = mamlatdars.filter(c => {
     const q = searchQuery.toLowerCase();
     const matchesSearch =
       c.respondent?.toLowerCase().includes(q) ||
@@ -79,7 +79,7 @@ export default function CasesList() {
 
   const downloadPersonalPDF = (c) => {
     const doc = new jsPDF();
-    doc.text(`Sub Register: ${c.petitioner} vs ${c.respondent}`, 14, 20);
+    doc.text(`Mamlatdar: ${c.petitioner} vs ${c.respondent}`, 14, 20);
     
     const bodyData = [
       ['Filing Date', formatDate(c.filingDate)],
@@ -98,12 +98,12 @@ export default function CasesList() {
       body: bodyData,
     });
 
-    doc.save(`SubRegister_${c.village}_${c.petitioner}.pdf`);
+    doc.save(`Mamlatdar_${c.village}_${c.petitioner}.pdf`);
   };
 
   const downloadAllPDF = () => {
     const doc = new jsPDF();
-    doc.text('Sub Register Records', 14, 20);
+    doc.text('Mamlatdar Records', 14, 20);
     
     const tableData = filteredCases.map((c, index) => [
       index + 1,
@@ -122,7 +122,7 @@ export default function CasesList() {
       body: tableData,
     });
 
-    doc.save('All_SubRegister.pdf');
+    doc.save('All_Mamlatdars.pdf');
   };
 
   return (
@@ -130,7 +130,7 @@ export default function CasesList() {
 
       {/* ── Header ─────────────────────────────── */}
       <div className="panel-header">
-        <h3 className="panel-title">📁 {t('Sub Register')}</h3>
+        <h3 className="panel-title">🏛️ {t('Mamlatdar')}</h3>
         <div style={{ display: 'flex', gap: '10px' }}>
           <button 
             className="btn-secondary" 
@@ -146,7 +146,7 @@ export default function CasesList() {
               onClick={() => { resetForm(); setShowAddForm(true); }}
               id="add-case-btn"
             >
-              {t('+ Register New Sub Register')}
+              {t('+ Register New Mamlatdar')}
             </button>
           )}
         </div>
@@ -265,7 +265,7 @@ export default function CasesList() {
                       ) : (
                         <select
                           value={c.status}
-                          onChange={(e) => updateCaseStatus(c.id, e.target.value)}
+                          onChange={(e) => updateMamlatdarStatus(c.id, e.target.value)}
                           style={{
                             background: ss.bg, border: `1px solid ${ss.color}50`,
                             color: ss.color, borderRadius: '20px',
@@ -301,7 +301,7 @@ export default function CasesList() {
                           </button>
                           <button
                             className="btn-icon delete"
-                            onClick={() => deleteCase(c.id)}
+                            onClick={() => deleteMamlatdar(c.id)}
                             title="Delete Record"
                             id={`delete-case-${c.id}`}
                           >
@@ -323,7 +323,7 @@ export default function CasesList() {
         <div className="modal-overlay animated-fade">
           <div className="modal-content glass-panel" style={{ background: 'var(--bg-secondary)', maxWidth: '600px', width: '100%', maxHeight: '90vh', overflowY: 'auto' }}>
             <div className="modal-header">
-              <h3 className="modal-title">📁 {editingId ? 'Edit Sub Register Record' : t('Register New Sub Register')}</h3>
+              <h3 className="modal-title">🏛️ {editingId ? 'Edit Mamlatdar Record' : t('Register New Mamlatdar')}</h3>
               <button className="modal-close" onClick={() => { setShowAddForm(false); resetForm(); }}>×</button>
             </div>
             <form onSubmit={handleSubmit}>

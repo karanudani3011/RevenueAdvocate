@@ -15,10 +15,6 @@ export default function HearingsList() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!caseId || !date || !time || !room || !judge) {
-      alert('Please fill in all fields');
-      return;
-    }
     addHearing(caseId, date, time, room, judge);
     setShowAddForm(false);
     // Reset fields

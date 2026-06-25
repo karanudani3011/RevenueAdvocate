@@ -16,21 +16,26 @@ const getTodayDateString = (offsetDays = 0) => {
 };
 
 const initialClients = [
-  { id: 'c1', regDate: '2026-01-04', number: '246', caseType: 'ડી.એ. દાખલ', name: 'લાલુ આસુરામ હરીજન', courtName: 'એડિ. કલે. સા. પૂર્વ', caseDetails: '૧૨૨ના હુકમ સામે અપીલ', advocateName: 'કે.પી. ઉદાણી', fee: '25000' },
-  { id: 'c2', regDate: '2026-01-07', number: '1739', caseType: 'ઈ.પી.એમ.સી.', name: 'દીપરાજ', courtName: 'એડિ. કલે. સા. પૂર્વ', caseDetails: 'ખાતા નંબર 419, ક્ષેત્રફળ ૧૮-૨ ઈ.પી. ૨૦૨૪', advocateName: 'કે.પી. ઉદાણી', fee: '50000' },
-  { id: 'c3', regDate: '2026-01-09', number: '4619', caseType: 'વકીલાત', name: 'નરેશ', courtName: 'મામલતદાર સાહેબ ભુજ', caseDetails: 'ખાતા નંબર ૨૩૨, હે.૧૦.૧૪.૪૬, પ્ર.એચ.૨-૨૪-૯૩', advocateName: 'કે.પી. ઉદાણી', fee: '35000' },
-  { id: 'c4', regDate: '2026-01-09', number: '3392', caseType: 'હક્કપત્રક', name: 'માવજી', courtName: 'મામલતદાર સાહેબ ભુજ', caseDetails: 'ખાતા નંબર ૧૬૬, રે.સર્વે. ૨૧૨, ૧૨૩, ક્ષેત્રફળ ૨૯.૨૬.૦૭', advocateName: 'કે.પી. ઉદાણી', fee: '15000' },
-  { id: 'c5', regDate: '2026-01-12', number: '1427', caseType: 'ટી.એસ. દાખલ', name: 'મુકેશ', courtName: 'મામલતદાર સાહેબ અંજાર', caseDetails: 'ખાતા નંબર ૧૨૫, રે.સર્વે. ૧૫૮, ૧૬૧', advocateName: 'કે.પી. ઉદાણી', fee: '45000' },
-  { id: 'c6', regDate: '2026-01-20', number: '1517', caseType: 'હક્કપત્રક', name: 'હરિલાલ', courtName: 'મામલતદાર સાહેબ રાપર', caseDetails: 'ખાતા નંબર ૩૪૫, રે.સર્વે. ૬૬, ૭૫', advocateName: 'કે.પી. ઉદાણી', fee: '30000' }
+  { id: 'c1', regDate: '2026-01-04', number: '246', caseType: 'ડી.એ. દાખલ', name: 'લાલુ આસુરામ હરીજન', caseDetails: '૧૨૨ના હુકમ સામે અપીલ', fee: '25000' },
+  { id: 'c2', regDate: '2026-01-07', number: '1739', caseType: 'ઈ.પી.એમ.સી.', name: 'દીપરાજ', caseDetails: 'ખાતા નંબર 419, ક્ષેત્રફળ ૧૮-૨ ઈ.પી. ૨૦૨૪', fee: '50000' },
+  { id: 'c3', regDate: '2026-01-09', number: '4619', caseType: 'વકીલાત', name: 'નરેશ', caseDetails: 'ખાતા નંબર ૨૩૨, હે.૧૦.૧૪.૪૬, પ્ર.એચ.૨-૨૪-૯૩', fee: '35000' },
+  { id: 'c4', regDate: '2026-01-09', number: '3392', caseType: 'હક્કપત્રક', name: 'માવજી', caseDetails: 'ખાતા નંબર ૧૬૬, રે.સર્વે. ૨૧૨, ૧૨૩, ક્ષેત્રફળ ૨૯.૨૬.૦૭', fee: '15000' },
+  { id: 'c5', regDate: '2026-01-12', number: '1427', caseType: 'ટી.એસ. દાખલ', name: 'મુકેશ', caseDetails: 'ખાતા નંબર ૧૨૫, રે.સર્વે. ૧૫૮, ૧૬૧', fee: '45000' },
+  { id: 'c6', regDate: '2026-01-20', number: '1517', caseType: 'હક્કપત્રક', name: 'હરિલાલ', caseDetails: 'ખાતા નંબર ૩૪૫, રે.સર્વે. ૬૬, ૭૫', fee: '30000' }
 ];
 
 const initialCases = [
-  { id: 'case1', filingDate: '2026-01-09', respondent: 'અમરાભાઈ ભીમાભાઈ કોલી', petitioner: 'જીવરાજભાઈ નારણભાઈ રબારી', propertyDetails: 'નાણી(મોટી) ગામના રે.સર્વે નંબર ૬૬૭, ક્ષેત્રફળ ૨.૧૧.૦૫ હે.', village: 'નાણી(મોટી)', status: 'active', remarks: 'દાખલ', signature: '' },
-  { id: 'case2', filingDate: '2026-01-12', respondent: 'ગોવિંદભાઈ મોહનલાલ સૂર્યાણી', petitioner: 'અમરાભાઈ ભીમાભાઈ', propertyDetails: 'ગોધરા ગામના રે.સર્વે નંબર ૫૧૭, ક્ષેત્રફળ ૩.૪૭.૨૧ હે.', village: 'ગોધરા', status: 'active', remarks: 'દાખલ', signature: '' },
-  { id: 'case3', filingDate: '2026-01-22', respondent: 'ખેંગારભાઈ વાલજીભાઈ કોલી', petitioner: 'મેરૂભાઈ કાનાભાઈ બળિયા', propertyDetails: 'ગોધરા ગામના રે.સર્વે નંબર ૧૪૩, ક્ષેત્રફળ ૨.૪૦.૦૦ હે.', village: 'ગોધરા', status: 'active', remarks: 'દાખલ', signature: '' },
-  { id: 'case4', filingDate: '2026-02-02', respondent: 'લાલજીભાઈ નારાણભાઈ પ્રજાપતિ', petitioner: 'અમરાભાઈ મોહનભાઈ', propertyDetails: 'મોડસર ગામના રે.સર્વે નંબર ૨૨૭, ક્ષેત્રફળ ૩.૪૫.૦૦ હે.', village: 'મોડસર', status: 'pending', remarks: 'દાખલ', signature: '' },
-  { id: 'case5', filingDate: '2026-02-11', respondent: 'ભીમજીભાઈ નથુભાઈ લાલજી', petitioner: 'મંગલસિંહ અજીતસિંહ વાઘેલા', propertyDetails: 'કોટડા ગામના રે.સર્વે નંબર ૧૫૬, ક્ષેત્રફળ ૧.૯૮.૦૦ હે.', village: 'કોટડા', status: 'pending', remarks: 'દાખલ', signature: '' },
-  { id: 'case6', filingDate: '2026-02-28', respondent: 'અમરાભાઈ કાનજીભાઈ મહેશ્વરી', petitioner: 'હર્ષદલાલ રામજીલાલ વ્યાસ', propertyDetails: 'નાણી(મોટી) ગામના રે.સર્વે નંબર ૨૪૭, ક્ષેત્રફળ ૨.૫૦.૦૦ હે.', village: 'નાણી(મોટી)', status: 'closed', remarks: 'બંધ', signature: '' }
+  { id: 'case1', filingDate: '2026-01-09', respondent: 'અમરાભાઈ ભીમાભાઈ કોલી', petitioner: 'જીવરાજભાઈ નારણભાઈ રબારી', propertyDetails: 'નાણી(મોટી) ગામના રે.સર્વે નંબર ૬૬૭, ક્ષેત્રફળ ૨.૧૧.૦૫ હે.', village: 'નાણી(મોટી)', status: 'active', remarks: 'દાખલ', extraDetail: '' },
+  { id: 'case2', filingDate: '2026-01-12', respondent: 'ગોવિંદભાઈ મોહનલાલ સૂર્યાણી', petitioner: 'અમરાભાઈ ભીમાભાઈ', propertyDetails: 'ગોધરા ગામના રે.સર્વે નંબર ૫૧૭, ક્ષેત્રફળ ૩.૪૭.૨૧ હે.', village: 'ગોધરા', status: 'active', remarks: 'દાખલ', extraDetail: '' },
+  { id: 'case3', filingDate: '2026-01-22', respondent: 'ખેંગારભાઈ વાલજીભાઈ કોલી', petitioner: 'મેરૂભાઈ કાનાભાઈ બળિયા', propertyDetails: 'ગોધરા ગામના રે.સર્વે નંબર ૧૪૩, ક્ષેત્રફળ ૨.૪૦.૦૦ હે.', village: 'ગોધરા', status: 'active', remarks: 'દાખલ', extraDetail: '' },
+  { id: 'case4', filingDate: '2026-02-02', respondent: 'લાલજીભાઈ નારાણભાઈ પ્રજાપતિ', petitioner: 'અમરાભાઈ મોહનભાઈ', propertyDetails: 'મોડસર ગામના રે.સર્વે નંબર ૨૨૭, ક્ષેત્રફળ ૩.૪૫.૦૦ હે.', village: 'મોડસર', status: 'pending', remarks: 'દાખલ', extraDetail: '' },
+  { id: 'case5', filingDate: '2026-02-11', respondent: 'ભીમજીભાઈ નથુભાઈ લાલજી', petitioner: 'મંગલસિંહ અજીતસિંહ વાઘેલા', propertyDetails: 'કોટડા ગામના રે.સર્વે નંબર ૧૫૬, ક્ષેત્રફળ ૧.૯૮.૦૦ હે.', village: 'કોટડા', status: 'pending', remarks: 'દાખલ', extraDetail: '' },
+  { id: 'case6', filingDate: '2026-02-28', respondent: 'અમરાભાઈ કાનજીભાઈ મહેશ્વરી', petitioner: 'હર્ષદલાલ રામજીલાલ વ્યાસ', propertyDetails: 'નાણી(મોટી) ગામના રે.સર્વે નંબર ૨૪૭, ક્ષેત્રફળ ૨.૫૦.૦૦ હે.', village: 'નાણી(મોટી)', status: 'closed', remarks: 'બંધ', extraDetail: '' }
+];
+
+const initialMamlatdars = [
+  { id: 'mam1', filingDate: '2026-01-09', respondent: 'અમરાભાઈ ભીમાભાઈ કોલી', petitioner: 'જીવરાજભાઈ નારણભાઈ રબારી', propertyDetails: 'નાણી(મોટી) ગામના રે.સર્વે નંબર ૬૬૭, ક્ષેત્રફળ ૨.૧૧.૦૫ હે.', village: 'નાણી(મોટી)', status: 'active', remarks: 'દાખલ', extraDetail: '' },
+  { id: 'mam2', filingDate: '2026-01-12', respondent: 'ગોવિંદભાઈ મોહનલાલ સૂર્યાણી', petitioner: 'અમરાભાઈ ભીમાભાઈ', propertyDetails: 'ગોધરા ગામના રે.સર્વે નંબર ૫૧૭, ક્ષેત્રફળ ૩.૪૭.૨૧ હે.', village: 'ગોધરા', status: 'active', remarks: 'દાખલ', extraDetail: '' }
 ];
 
 const initialHearings = [
@@ -165,6 +170,11 @@ export const AppProvider = ({ children }) => {
     return saved ? JSON.parse(saved) : initialCases;
   });
 
+  const [mamlatdars, setMamlatdars] = useState(() => {
+    const saved = localStorage.getItem('adv_mamlatdars');
+    return saved ? JSON.parse(saved) : initialMamlatdars;
+  });
+
   const [hearings, setHearings] = useState(() => {
     const saved = localStorage.getItem('adv_hearings');
     return saved ? JSON.parse(saved) : initialHearings;
@@ -201,6 +211,10 @@ export const AppProvider = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('adv_cases', JSON.stringify(cases));
   }, [cases]);
+
+  useEffect(() => {
+    localStorage.setItem('adv_mamlatdars', JSON.stringify(mamlatdars));
+  }, [mamlatdars]);
 
   useEffect(() => {
     localStorage.setItem('adv_hearings', JSON.stringify(hearings));
@@ -526,20 +540,24 @@ export const AppProvider = ({ children }) => {
   };
 
   // CRUD Operations
-  const addClient = (regDate, number, caseType, name, courtName, caseDetails, advocateName, fee) => {
+  const addClient = (regDate, number, caseType, name, caseDetails, fee) => {
     const newClient = {
       id: 'c_' + Date.now(),
       regDate,
       number,
       caseType,
       name,
-      courtName,
       caseDetails,
-      advocateName,
       fee
     };
     setClients(prev => [...prev, newClient]);
     addActivity(`New case register entry: ${name} (${number})`, 'client');
+  };
+
+  const updateClient = (id, updatedData) => {
+    setClients(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
+    const target = clients.find(c => c.id === id) || updatedData;
+    addActivity(`Client profile updated: ${target.name}`, 'client');
   };
 
   const deleteClient = (id) => {
@@ -549,7 +567,7 @@ export const AppProvider = ({ children }) => {
     addActivity(`Client removed: ${target.name}`, 'client');
   };
 
-  const addCase = (filingDate, respondent, petitioner, propertyDetails, village, status, remarks) => {
+  const addCase = (filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail) => {
     const newCase = {
       id: 'case_' + Date.now(),
       filingDate: filingDate || new Date().toISOString().split('T')[0],
@@ -558,24 +576,67 @@ export const AppProvider = ({ children }) => {
       propertyDetails,
       village,
       status: status || 'active',
-      remarks: remarks || 'દાખલ'
+      remarks: remarks || 'દાખલ',
+      extraDetail: extraDetail || ''
     };
     setCases(prev => [...prev, newCase]);
-    addActivity(`New case filed: ${petitioner} vs ${respondent} (${village})`, 'case');
+    addActivity(`New sub register filed: ${petitioner} vs ${respondent} (${village})`, 'case');
+  };
+
+  const updateCase = (id, updatedData) => {
+    setCases(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
+    const target = cases.find(c => c.id === id) || updatedData;
+    addActivity(`Sub register updated: ${target.petitioner} vs ${target.respondent}`, 'case');
   };
 
   const updateCaseStatus = (id, status) => {
     setCases(prev => prev.map(c => c.id === id ? { ...c, status } : c));
     const target = cases.find(c => c.id === id);
     const label = target ? `${target.petitioner} vs ${target.respondent}` : id;
-    addActivity(`Case "${label}" status updated to ${status}`, 'case');
+    addActivity(`Sub register "${label}" status updated to ${status}`, 'case');
   };
 
   const deleteCase = (id) => {
     const target = cases.find(c => c.id === id);
     const label = target ? `${target.petitioner} vs ${target.respondent}` : id;
     setCases(prev => prev.filter(c => c.id !== id));
-    addActivity(`Case "${label}" removed`, 'case');
+    addActivity(`Sub register "${label}" removed`, 'case');
+  };
+
+  const addMamlatdar = (filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail) => {
+    const newMamlatdar = {
+      id: 'mam_' + Date.now(),
+      filingDate: filingDate || new Date().toISOString().split('T')[0],
+      respondent,
+      petitioner,
+      propertyDetails,
+      village,
+      status: status || 'active',
+      remarks: remarks || 'દાખલ',
+      extraDetail: extraDetail || ''
+    };
+    setMamlatdars(prev => [...prev, newMamlatdar]);
+    addActivity(`New mamlatdar filed: ${petitioner} vs ${respondent} (${village})`, 'case');
+  };
+
+  const updateMamlatdar = (id, updatedData) => {
+    setMamlatdars(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
+    const target = mamlatdars.find(c => c.id === id) || updatedData;
+    addActivity(`Mamlatdar updated: ${target.petitioner} vs ${target.respondent}`, 'case');
+  };
+
+  const updateMamlatdarStatus = (id, status) => {
+    setMamlatdars(prev => prev.map(c => c.id === id ? { ...c, status } : c));
+    const target = mamlatdars.find(c => c.id === id);
+    const label = target ? `${target.petitioner} vs ${target.respondent}` : id;
+    addActivity(`Mamlatdar "${label}" status updated to ${status}`, 'case');
+  };
+
+  const deleteMamlatdar = (id) => {
+    const target = mamlatdars.find(c => c.id === id);
+    const label = target ? `${target.petitioner} vs ${target.respondent}` : id;
+    setMamlatdars(prev => prev.filter(c => c.id !== id));
+    addActivity(`Mamlatdar "${label}" removed`, 'case');
   };
 
   const addHearing = (caseId, date, time, room, judge) => {
@@ -623,12 +684,7 @@ export const AppProvider = ({ children }) => {
     addActivity(`Transaction record of ₹${target ? target.amount : ''} removed`, 'payment');
   };
 
-  const updateCaseSignature = (id, signatureDataUrl) => {
-    setCases(prev => prev.map(c => c.id === id ? { ...c, signature: signatureDataUrl } : c));
-    const target = cases.find(c => c.id === id);
-    const label = target ? `${target.petitioner} vs ${target.respondent}` : id;
-    addActivity(`Signature added to case: ${label}`, 'case');
-  };
+
 
   return (
     <AppContext.Provider value={{
@@ -636,6 +692,7 @@ export const AppProvider = ({ children }) => {
       theme,
       clients,
       cases,
+      mamlatdars,
       hearings,
       payments,
       activities,
@@ -643,13 +700,17 @@ export const AppProvider = ({ children }) => {
       logout,
       changePassword,
       forgotPassword,
-      toggleTheme,
       addClient,
+      updateClient,
       deleteClient,
       addCase,
+      updateCase,
       updateCaseStatus,
       deleteCase,
-      updateCaseSignature,
+      addMamlatdar,
+      updateMamlatdar,
+      updateMamlatdarStatus,
+      deleteMamlatdar,
       addHearing,
       deleteHearing,
       addPayment,

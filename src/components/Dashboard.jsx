@@ -52,28 +52,28 @@ export default function Dashboard({ setCurrentTab }) {
           onClick={() => setCurrentTab('clients')}
         />
         <StatsCard
-          title={t("Active Cases")}
+          title={t("Active Sub Register")}
           value={activeCases}
           icon="📁"
-          trend={{ type: 'neutral', value: t('Active'), label: t('litigations') }}
+          trend={{ type: 'neutral', value: t('Active'), label: t('records') }}
           accentColor="var(--success)"
           bgGlow="var(--success-bg)"
           onClick={() => setCurrentTab('cases')}
         />
         <StatsCard
-          title={t("Closed Cases")}
+          title={t("Closed Sub Register")}
           value={closedCases}
           icon="✅"
-          trend={{ type: 'neutral', value: t('Settled'), label: t('verdicts') }}
+          trend={{ type: 'neutral', value: t('Settled'), label: t('records') }}
           accentColor="var(--text-muted)"
           bgGlow="rgba(0,0,0,0.02)"
           onClick={() => setCurrentTab('cases')}
         />
         <StatsCard
-          title={t("Pending Cases")}
+          title={t("Pending Sub Register")}
           value={pendingCases}
           icon="⏳"
-          trend={{ type: 'neutral', value: t('Awaiting'), label: t('hearing') }}
+          trend={{ type: 'neutral', value: t('Awaiting'), label: t('processing') }}
           accentColor="var(--warning)"
           bgGlow="var(--warning-bg)"
           onClick={() => setCurrentTab('cases')}

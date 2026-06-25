@@ -7,6 +7,7 @@ import Header from './components/Header';
 import Dashboard from './components/Dashboard';
 import ClientsList from './components/ClientsList';
 import CasesList from './components/CasesList';
+import MamlatdarList from './components/MamlatdarList';
 import PaymentsList from './components/PaymentsList';
 import Profile from './components/Profile';
 
@@ -38,6 +39,7 @@ function AppContent() {
           {currentTab === 'dashboard' && <Dashboard setCurrentTab={setCurrentTab} />}
           {currentTab === 'clients' && <ClientsList />}
           {currentTab === 'cases' && <CasesList />}
+          {currentTab === 'mamlatdar' && <MamlatdarList />}
           {currentTab === 'finance' && <PaymentsList />}
           {currentTab === 'profile' && <Profile />}
         </div>

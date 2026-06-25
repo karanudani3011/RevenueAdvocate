@@ -19,9 +19,10 @@ export default function Sidebar({ currentTab, setCurrentTab }) {
   };
 
   const navItems = [
-    { id: 'dashboard', label: t('Dashboard'),   icon: '📊' },
+    { id: 'dashboard', label: t('Dashboard'),    icon: '📊' },
     { id: 'clients',   label: t('Clients'),      icon: '👥' },
-    { id: 'cases',     label: t('Cases & Files'), icon: '📁' },
+    { id: 'cases',     label: t('Sub Register'), icon: '📁' },
+    { id: 'mamlatdar', label: t('Mamlatdar'),    icon: '🏛️' },
     { id: 'finance',   label: t('Financials'),   icon: '💰' },
     { id: 'profile',   label: t('My Profile'),   icon: '👤' },
   ];
