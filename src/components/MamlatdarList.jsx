@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { NotoSansGujaratiBase64 } from '../utils/gujaratiFont';
 
 const STATUS_STYLES = {
   active:  { bg: 'rgba(22,163,74,0.10)',   color: '#16a34a' },
@@ -79,6 +80,9 @@ export default function MamlatdarList() {
 
   const downloadPersonalPDF = (c) => {
     const doc = new jsPDF();
+    doc.addFileToVFS('NotoSansGujarati.ttf', NotoSansGujaratiBase64);
+    doc.addFont('NotoSansGujarati.ttf', 'NotoSansGujarati', 'normal');
+    doc.setFont('NotoSansGujarati');
     doc.text(`Mamlatdar: ${c.petitioner} vs ${c.respondent}`, 14, 20);
     
     const bodyData = [
@@ -96,6 +100,7 @@ export default function MamlatdarList() {
       startY: 30,
       head: [['Field', 'Details']],
       body: bodyData,
+      styles: { font: 'NotoSansGujarati' },
     });
 
     doc.save(`Mamlatdar_${c.village}_${c.petitioner}.pdf`);
@@ -103,6 +108,9 @@ export default function MamlatdarList() {
 
   const downloadAllPDF = () => {
     const doc = new jsPDF();
+    doc.addFileToVFS('NotoSansGujarati.ttf', NotoSansGujaratiBase64);
+    doc.addFont('NotoSansGujarati.ttf', 'NotoSansGujarati', 'normal');
+    doc.setFont('NotoSansGujarati');
     doc.text('Mamlatdar Records', 14, 20);
     
     const tableData = filteredCases.map((c, index) => [
@@ -120,6 +128,7 @@ export default function MamlatdarList() {
       startY: 30,
       head: [['S.No.', 'Filing Date', 'Petitioner', 'Respondent', 'Property', 'Village', 'Status', 'Remarks']],
       body: tableData,
+      styles: { font: 'NotoSansGujarati' },
     });
 
     doc.save('All_Mamlatdars.pdf');

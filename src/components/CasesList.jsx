@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { NotoSansGujaratiBase64 } from '../utils/gujaratiFont';
 
 const STATUS_STYLES = {
   active:  { bg: 'rgba(22,163,74,0.10)',   color: '#16a34a' },
@@ -82,6 +83,9 @@ export default function CasesList() {
 
   const downloadPersonalPDF = (c) => {
     const doc = new jsPDF();
+    doc.addFileToVFS('NotoSansGujarati.ttf', NotoSansGujaratiBase64);
+    doc.addFont('NotoSansGujarati.ttf', 'NotoSansGujarati', 'normal');
+    doc.setFont('NotoSansGujarati');
     doc.text(`Sub Register: ${c.petitioner} vs ${c.respondent}`, 14, 20);
     
     const bodyData = [
@@ -99,6 +103,7 @@ export default function CasesList() {
       startY: 30,
       head: [['Field', 'Details']],
       body: bodyData,
+      styles: { font: 'NotoSansGujarati' },
     });
 
     doc.save(`SubRegister_${c.village}_${c.petitioner}.pdf`);
@@ -106,6 +111,9 @@ export default function CasesList() {
 
   const downloadAllPDF = () => {
     const doc = new jsPDF();
+    doc.addFileToVFS('NotoSansGujarati.ttf', NotoSansGujaratiBase64);
+    doc.addFont('NotoSansGujarati.ttf', 'NotoSansGujarati', 'normal');
+    doc.setFont('NotoSansGujarati');
     doc.text('Sub Register Records', 14, 20);
     
     // Sort ascending by date
@@ -127,6 +135,7 @@ export default function CasesList() {
       startY: 30,
       head: [['S.No.', 'Filing Date', 'Petitioner', 'Respondent', 'Property', 'Village', 'PDF', 'Status', 'Remarks']],
       body: tableData,
+      styles: { font: 'NotoSansGujarati' },
     });
 
     doc.save('All_SubRegister.pdf');

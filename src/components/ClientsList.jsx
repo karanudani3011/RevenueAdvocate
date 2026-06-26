@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { NotoSansGujaratiBase64 } from '../utils/gujaratiFont';
 
 export default function ClientsList() {
   const { clients, addClient, updateClient, deleteClient, t } = useApp();
@@ -74,6 +75,9 @@ export default function ClientsList() {
 
   const downloadPersonalPDF = (client) => {
     const doc = new jsPDF();
+    doc.addFileToVFS('NotoSansGujarati.ttf', NotoSansGujaratiBase64);
+    doc.addFont('NotoSansGujarati.ttf', 'NotoSansGujarati', 'normal');
+    doc.setFont('NotoSansGujarati');
     doc.text(`Client Profile: ${client.name}`, 14, 20);
     
     const bodyData = [
@@ -92,6 +96,7 @@ export default function ClientsList() {
       startY: 30,
       head: [['Field', 'Details']],
       body: bodyData,
+      styles: { font: 'NotoSansGujarati' },
     });
 
     doc.save(`Client_${client.name || 'Profile'}.pdf`);
@@ -99,6 +104,9 @@ export default function ClientsList() {
 
   const downloadAllPDF = () => {
     const doc = new jsPDF();
+    doc.addFileToVFS('NotoSansGujarati.ttf', NotoSansGujaratiBase64);
+    doc.addFont('NotoSansGujarati.ttf', 'NotoSansGujarati', 'normal');
+    doc.setFont('NotoSansGujarati');
     doc.text('Client Directory', 14, 20);
     
     const tableData = filteredClients.map((c, index) => [
@@ -118,6 +126,7 @@ export default function ClientsList() {
       startY: 30,
       head: [['S.No.', 'Reg Date', 'Number', 'Type', 'Name', 'Phone 1', 'Phone 2', 'Details', 'Fee', 'Status']],
       body: tableData,
+      styles: { font: 'NotoSansGujarati' },
     });
 
     doc.save('All_Clients.pdf');
