@@ -3,7 +3,6 @@ import { useApp } from '../context/AppContext';
 
 function ChangePasswordSection() {
   const { changePassword, t } = useApp();
-  const [oldPassword, setOldPassword]         = useState('');
   const [newPassword, setNewPassword]         = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError]   = useState('');
@@ -15,7 +14,7 @@ function ChangePasswordSection() {
     setError(''); 
     setSuccess('');
 
-    if (!oldPassword || !newPassword || !confirmPassword) {
+    if (!newPassword || !confirmPassword) {
       setError(t('Please fill in all fields.') || 'Please fill in all fields.'); 
       return;
     }
@@ -29,12 +28,11 @@ function ChangePasswordSection() {
     }
 
     setLoading(true);
-    const res = await changePassword(oldPassword, newPassword);
+    const res = await changePassword(newPassword);
     setLoading(false);
 
     if (res.success) {
       setSuccess(t('Password updated successfully!') || 'Password updated successfully!');
-      setOldPassword(''); 
       setNewPassword(''); 
       setConfirmPassword('');
       setTimeout(() => setSuccess(''), 4000);
@@ -65,21 +63,7 @@ function ChangePasswordSection() {
       )}
 
       <form onSubmit={handleSubmit}>
-        <div className="responsive-form-grid">
-          <div className="form-group" style={{ marginBottom: 0 }}>
-            <label className="form-label">{t('Current Password')}</label>
-            <div className="input-wrapper">
-              <input 
-                type="password" 
-                className="form-input" 
-                placeholder={t('Current Password')}
-                value={oldPassword} 
-                onChange={(e) => setOldPassword(e.target.value)} 
-                id="chg-old-pw" 
-              />
-              <span className="input-icon">🔒</span>
-            </div>
-          </div>
+        <div className="responsive-form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>
           <div className="form-group" style={{ marginBottom: 0 }}>
             <label className="form-label">{t('New Password')}</label>
             <div className="input-wrapper">

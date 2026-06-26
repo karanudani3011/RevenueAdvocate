@@ -4,10 +4,7 @@ import { translations } from '../translations';
 
 const AppContext = createContext();
 
-const initialUsers = {
-  admin: { username: 'admin', password: 'admin123', role: 'Super Admin (Advocate)', name: 'Adv. Karan Sharma', securityAnswer: 'delhi', email: 'karan.sharma@lexjuris.in', phone: '+91 98101 23456', licenceNumber: 'BAR/DL/2018/04821', licenceImageUrl: '' },
-  accountant: { username: 'accountant', password: 'accountant123', role: 'Accountant', name: 'Neelam Sen', securityAnswer: 'bangalore', email: 'neelam.sen@lexjuris.in', phone: '+91 99203 87654', licenceNumber: 'N/A', licenceImageUrl: '' }
-};
+const initialUsers = {};
 
 const getTodayDateString = (offsetDays = 0) => {
   const d = new Date();
@@ -380,7 +377,7 @@ export const AppProvider = ({ children }) => {
     setCurrentUser(null);
   };
 
-  const changePassword = async (oldPassword, newPassword) => {
+  const changePassword = async (newPassword) => {
     if (isSupabaseConfigured) {
       try {
         const { error } = await supabase.auth.updateUser({
@@ -395,12 +392,7 @@ export const AppProvider = ({ children }) => {
     } else {
       if (!currentUser) return { success: false, message: 'Not logged in' };
       const username = currentUser.username.toLowerCase();
-      const activeUserData = usersList[username];
       
-      if (activeUserData.password !== oldPassword) {
-        return { success: false, message: 'Incorrect old password' };
-      }
-
       setUsersList(prev => ({
         ...prev,
         [username]: {

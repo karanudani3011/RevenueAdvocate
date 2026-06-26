@@ -292,15 +292,7 @@ export default function Login({ onNavigateToForgot }) {
           </button>
         </div>
 
-        {!isSignUpMode && (
-          <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid var(--border-color)', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <p style={{ fontWeight: '600', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Demo Accounts:</p>
-            <ul style={{ listStyleType: 'none', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <li>⚖️ <strong>Super Admin:</strong> <code>karan.sharma@lexjuris.in</code> / <code>admin123</code></li>
-              <li>💰 <strong>Accountant:</strong> <code>neelam.sen@lexjuris.in</code> / <code>accountant123</code></li>
-            </ul>
-          </div>
-        )}
+
       </div>
     </div>
   );

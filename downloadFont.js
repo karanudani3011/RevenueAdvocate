@@ -1,7 +1,7 @@
 import fs from 'fs';
 import https from 'https';
 
-const url = 'https://raw.githubusercontent.com/googlefonts/noto-fonts/main/hinted/ttf/NotoSansGujarati/NotoSansGujarati-Regular.ttf';
+const url = 'https://fonts.gstatic.com/s/notosansgujarati/v27/wlpWgx_HC1ti5ViekvcxnhMlCVo3f5pv17ivlzsUB14gg1TMR2Gw4VceEl7MA_ypFwPM.ttf';
 
 https.get(url, (res) => {
     if (res.statusCode !== 200) {
