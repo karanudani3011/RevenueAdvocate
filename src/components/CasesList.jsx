@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const STATUS_STYLES = {
   active:  { bg: 'rgba(22,163,74,0.10)',   color: '#16a34a' },
@@ -28,6 +28,7 @@ export default function CasesList() {
   const [status,          setStatus]          = useState('active');
   const [remarks,         setRemarks]         = useState('દાખલ');
   const [extraDetail,     setExtraDetail]     = useState('');
+  const [pdfFileName,     setPdfFileName]     = useState('');
 
   const isReadOnly = currentUser?.role === 'Accountant';
 
@@ -41,6 +42,7 @@ export default function CasesList() {
     setStatus(c.status || 'active');
     setRemarks(c.remarks || '');
     setExtraDetail(c.extraDetail || '');
+    setPdfFileName(c.pdfFileName || '');
     setShowAddForm(true);
   };
 
@@ -50,15 +52,16 @@ export default function CasesList() {
     setPropertyDetails(''); setVillage('');
     setStatus('active'); setRemarks('દાખલ');
     setExtraDetail('');
+    setPdfFileName('');
     setEditingId(null);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (editingId) {
-      updateCase(editingId, { filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail });
+      updateCase(editingId, { filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail, pdfFileName });
     } else {
-      addCase(filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail);
+      addCase(filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail, pdfFileName);
     }
     setShowAddForm(false);
     resetForm();
@@ -92,7 +95,7 @@ export default function CasesList() {
       ['Remarks', c.remarks || '']
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 30,
       head: [['Field', 'Details']],
       body: bodyData,
@@ -105,20 +108,24 @@ export default function CasesList() {
     const doc = new jsPDF();
     doc.text('Sub Register Records', 14, 20);
     
-    const tableData = filteredCases.map((c, index) => [
+    // Sort ascending by date
+    const sortedCases = [...filteredCases].sort((a, b) => new Date(a.filingDate) - new Date(b.filingDate));
+    
+    const tableData = sortedCases.map((c, index) => [
       index + 1,
       formatDate(c.filingDate),
       c.petitioner,
       c.respondent,
       c.propertyDetails,
       c.village,
+      c.pdfFileName ? 'Yes' : 'No',
       c.status,
       c.remarks
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 30,
-      head: [['S.No.', 'Filing Date', 'Petitioner', 'Respondent', 'Property', 'Village', 'Status', 'Remarks']],
+      head: [['S.No.', 'Filing Date', 'Petitioner', 'Respondent', 'Property', 'Village', 'PDF', 'Status', 'Remarks']],
       body: tableData,
     });
 
@@ -200,6 +207,7 @@ export default function CasesList() {
                 <th>{t('Respondent (Denar)')}</th>
                 <th>{t('Property Details')}</th>
                 <th style={{ whiteSpace: 'nowrap' }}>{t('Village')}</th>
+                <th style={{ width: '70px',  textAlign: 'center' }}>{t('PDF')}</th>
                 <th style={{ width: '90px',  textAlign: 'center' }}>{t('Remarks')}</th>
                 <th style={{ width: '120px',  textAlign: 'center' }}>{t('Actions')}</th>
               </tr>
@@ -250,6 +258,15 @@ export default function CasesList() {
                       }}>
                         {c.village}
                       </span>
+                    </td>
+
+                    {/* PDF */}
+                    <td style={{ textAlign: 'center' }}>
+                      {c.pdfFileName ? (
+                        <span title={c.pdfFileName} style={{ fontSize: '16px', color: 'var(--danger)' }}>📄</span>
+                      ) : (
+                        <span style={{ color: 'var(--text-muted)' }}>—</span>
+                      )}
                     </td>
 
                     {/* શેરો */}
@@ -393,6 +410,27 @@ export default function CasesList() {
                     id="new-case-extra" />
                   <span className="input-icon" style={{ top: '14px' }}>📄</span>
                 </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">{t('Upload PDF Document (Max 10MB)')}</label>
+                <div className="input-wrapper" style={{ padding: '8px', border: '1px dashed var(--border-color)', borderRadius: 'var(--radius-md)' }}>
+                  <input type="file" accept="application/pdf"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file) {
+                        if (file.size > 10 * 1024 * 1024) {
+                          alert('File size exceeds 10MB restriction.');
+                          e.target.value = '';
+                          setPdfFileName('');
+                        } else {
+                          setPdfFileName(file.name);
+                        }
+                      }
+                    }}
+                    style={{ width: '100%' }} id="new-case-pdf" />
+                </div>
+                {pdfFileName && <div style={{ fontSize: '12px', color: 'var(--success)', marginTop: '4px' }}>Selected: {pdfFileName}</div>}
               </div>
 
               <div className="responsive-form-grid" style={{ gridTemplateColumns: '1fr 1fr' }}>

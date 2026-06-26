@@ -570,7 +570,7 @@ export const AppProvider = ({ children }) => {
     addActivity(`Client removed: ${target.name}`, 'client');
   };
 
-  const addCase = (filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail) => {
+  const addCase = (filingDate, respondent, petitioner, propertyDetails, village, status, remarks, extraDetail, pdfFileName) => {
     const newCase = {
       id: 'case_' + Date.now(),
       filingDate: filingDate || new Date().toISOString().split('T')[0],
@@ -580,7 +580,8 @@ export const AppProvider = ({ children }) => {
       village,
       status: status || 'active',
       remarks: remarks || 'દાખલ',
-      extraDetail: extraDetail || ''
+      extraDetail: extraDetail || '',
+      pdfFileName: pdfFileName || ''
     };
     setCases(prev => [...prev, newCase]);
     addActivity(`New sub register filed: ${petitioner} vs ${respondent} (${village})`, 'case');

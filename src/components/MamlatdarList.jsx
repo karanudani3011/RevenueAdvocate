@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 const STATUS_STYLES = {
   active:  { bg: 'rgba(22,163,74,0.10)',   color: '#16a34a' },
@@ -92,7 +92,7 @@ export default function MamlatdarList() {
       ['Remarks', c.remarks || '']
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 30,
       head: [['Field', 'Details']],
       body: bodyData,
@@ -116,7 +116,7 @@ export default function MamlatdarList() {
       c.remarks
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 30,
       head: [['S.No.', 'Filing Date', 'Petitioner', 'Respondent', 'Property', 'Village', 'Status', 'Remarks']],
       body: tableData,

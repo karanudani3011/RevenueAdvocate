@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 export default function ClientsList() {
   const { clients, addClient, updateClient, deleteClient, t } = useApp();
@@ -88,7 +88,7 @@ export default function ClientsList() {
       ['Payment Status', client.paymentStatus === 'received' ? 'Received' : 'Pending']
     ];
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 30,
       head: [['Field', 'Details']],
       body: bodyData,
@@ -114,7 +114,7 @@ export default function ClientsList() {
       c.paymentStatus === 'received' ? 'Received' : 'Pending'
     ]);
 
-    doc.autoTable({
+    autoTable(doc, {
       startY: 30,
       head: [['S.No.', 'Reg Date', 'Number', 'Type', 'Name', 'Phone 1', 'Phone 2', 'Details', 'Fee', 'Status']],
       body: tableData,
